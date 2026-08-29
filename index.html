@@ -79,6 +79,9 @@
   .tab{padding:9px 15px;background:var(--panel);border:1px solid var(--line);border-radius:9px;cursor:pointer;font-size:13px;color:var(--muted);transition:all .15s;white-space:nowrap}
   .tab:hover{border-color:var(--accent);color:var(--text)}
   .tab.active{background:var(--accent);color:#04121f;font-weight:700;border-color:var(--accent);box-shadow:0 2px 10px rgba(62,166,255,.35)}
+  .segbtn{padding:7px 14px;background:var(--panel2);border:1px solid var(--line);border-radius:9px;cursor:pointer;font-size:12px;color:var(--muted);transition:all .15s;white-space:nowrap;font-family:inherit}
+  .segbtn:hover{border-color:var(--accent);color:var(--text)}
+  .segbtn.active{background:var(--accent);color:#04121f;font-weight:700;border-color:var(--accent)}
 
   section{animation:fadein .25s ease}
   @keyframes fadein{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
@@ -246,7 +249,7 @@
         </div>
         <div class="panel">
           <h2>都道府県別 転入超過数（令和6年10月〜令和7年9月）<span class="tag tag-real">実データ</span></h2>
-          <div class="hint">赤＝岡山から出ていく先、青＝岡山に入ってくる元。<b>中国・四国から人を集めて、三大都市圏へ送り出す「中継地」型</b>の構造です。東京圏へ計-2,016人、大阪圏へ計-2,069人。</div>
+          <div class="hint">赤（マイナス）＝岡山から出ていく先、青（プラス）＝岡山に入ってくる元。<b>中国・四国から人を集めて、三大都市圏へ送り出す「中継地」型</b>の構造です。東京圏へ計2,016人、大阪圏へ計2,069人の転出超過。</div>
           <div class="chartbox"><canvas id="migPrefChart"></canvas></div>
         </div>
       </div>
@@ -473,9 +476,23 @@
       </div>
 
       <div class="panel">
-        <h2>大学 × 職種 県内就職者数 ヒートマップ <span class="tag tag-mock">推定（公表データなし）</span></h2>
-        <div class="hint">各大学から、どの職種へ何人が県内就職しているか（色が濃いほど多い）。<b>この粒度（大学×職種×県内/県外）の公表統計はどの大学でも確認できておらず、暫定的な推定値です。</b></div>
+        <h2>大学 × 戦略17分野 県内就職者数 ヒートマップ <span class="tag tag-mock">ダミー（推計モデル）</span></h2>
+        <div class="hint">18大学それぞれから、戦略17分野のどこへ何人が県内就職しているかの推計。色が濃いほど多く、各大学の「強み分野」＝県内産業への供給源が見えます。職種（事務職／技術職）で切り替えられます。</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center">
+          <div style="display:flex;gap:6px">
+            <button type="button" class="segbtn active" data-occ="all">合計</button>
+            <button type="button" class="segbtn" data-occ="admin">事務職</button>
+            <button type="button" class="segbtn" data-occ="tech">技術職</button>
+          </div>
+          <span id="heatTotal" style="font-size:12px;color:var(--muted);margin-left:6px"></span>
+        </div>
         <div class="heat-wrap"><div id="heatmap"></div></div>
+        <div class="note note-mock" style="margin-top:14px"><b>この表はダミー（推計値）です。</b>大学×分野×職種×県内外という粒度の公表統計は存在しないため、次の推計モデルで機械的に算出しています。<br>
+        ①各大学の<b>学部別入学定員（⑦の実データ・18大学83学部）</b>を出発点に、就職率80%を掛けて就職者数を推定。<br>
+        ②<b>県内就職率</b>は、公表のある岡山大学31.3%・津山工業高専7.1%等を用い、不明な大学は県平均40.8%を適用。<br>
+        ③学部系統（理工系・医療保健系・社会科学系など11系統）ごとに、どの戦略分野へ何割進むかの<b>配分係数</b>を設定し按分。<br>
+        ④同じく学部系統ごとの<b>技術職比率</b>（理工系82%、社会科学系12%など）で事務職・技術職に分割。<br>
+        したがって数値そのものに実証的な裏付けはありませんが、<b>「どの大学がどの分野に強いか」という構造は学部構成の実データを反映</b>しています。各大学の就職実績（職種別・分野別）が入手できれば、そのまま差し替え可能な設計です。</div>
       </div>
 
       <div class="srcbox">
@@ -517,21 +534,20 @@
       </div>
 
       <div class="panel">
-        <h2>大学 × 学部別 入学定員 一覧<span class="tag tag-real">実データ</span></h2>
-        <div class="hint">各大学の学則・情報公開ページから収集した学部別入学定員（11大学）。2040年欄は充足率65.8%を適用した目安値です。</div>
+        <h2>大学 × 学部別 入学定員 一覧（18大学 全学）<span class="tag tag-real">実データ</span><span class="tag tag-est">一部 推定</span></h2>
+        <div class="hint">県内の4年制大学18校すべての学部別入学定員。うち11大学は学則・情報公開ページ、7大学は公式サイト・入試要項・進学情報サイトから収集しました。2040年欄は文科省推計の充足率65.8%を適用した目安値です。</div>
         <div style="max-height:520px;overflow:auto"><table id="facultyTable"><thead><tr><th>大学</th><th>学部・学科</th><th>学部系統</th><th>入学定員</th><th>2040年目安</th><th>差（定員割れ）</th></tr></thead><tbody></tbody></table></div>
       </div>
 
       <div class="panel">
         <h2>大学別 入学定員（18大学）<span class="tag tag-real">一部実データ</span><span class="tag tag-est">一部概算</span></h2>
-        <div class="hint">学部別内訳が取得できた11大学に加え、残り7大学を含めた全18大学の入学定員。※印は収容定員÷標準修業年限による概算値です。</div>
+        <div class="hint">県内4年制大学18校の入学定員。今回、残り7大学についても学部別の内訳を収集し、収容定員からの概算値を実際の募集定員に置き換えました。</div>
         <table id="univCapTable"><thead><tr><th>大学名</th><th>入学定員</th><th>2040年目安</th><th>データ区分</th><th>出典・算出法</th></tr></thead><tbody></tbody></table>
       </div>
 
       <div class="note note-est">
         <b>定員データの精度について：</b>今回、公式の学則・情報公開ページを一次資料として学部別定員を収集した結果、これまで概算で扱っていた数値と以下の乖離が判明したため、<b>公式値に修正しています</b>：岡山大学 2,335人→<b>2,191人</b>（令和8年度学則。環境理工学部は令和3年度に工学部へ統合済み、グローバル・ディスカバリー・プログラムは各学部定員の内数）／岡山県立大学 505人→<b>370人</b>（学則。収容定員1,480÷4と内的整合）／川崎医療福祉大学 1,186人→<b>1,126人</b>（2027年度募集人員。医療秘書学科→医療コミュニケーション学科への改組等を反映）。<br><br>
-        <b>未取得：</b>くらしき作陽大学・山陽学園大学・美作大学・中国学園大学の4校は学部別内訳の公式裏取りが未了のため、大学別合計のみ概算値で掲載しています。岡山商科大学（450人）・新見公立大学（180人）は民間進学情報サイトが出典のため要再確認です。
-      </div>
+        <b>今回の拡張：</b>従来は11大学のみだった学部別内訳を、<b>18大学すべて</b>に拡張しました。追加した7大学のうち、くらしき作陽大学（音楽60／食文化130／子ども教育80＝270人）、美作大学（食物80／児童80／社会福祉50＝210人）、山陽学園大学（看護76／地域マネジメント48＝124人）、岡山医療専門職大学（理学療法80／作業療法30＝110人）は公式・入試要項ベースの実データです。中国学園大学は子ども学部100人・現代生活学部80人が実データ、国際教養学部30人のみ推定。川崎医科大学（医学科126人）・岡山学院大学（食物栄養40人）・新見公立大学（看護80／健康保育50／地域福祉50）は要確認です。<br><br><b>定員の下方修正：</b>収容定員÷標準修業年限による概算から実際の募集定員に置き換えた結果、くらしき作陽大学 382→270人、山陽学園大学 228→124人、川崎医科大学 142→126人と、いずれも下振れしました。これは各校が近年<b>すでに募集定員を縮小している</b>ことを示しており、2040年の定員割れは「これから起きること」ではなく、<b>すでに始まっている</b>と読むべきです。一方、岡山医療専門職大学は80→110人と増えており、医療・保健系は例外的に拡大局面にあります。</div>
 
       <div class="srcbox">
         <h4>⑦ の出典</h4>
@@ -658,12 +674,13 @@ const migPref=[
 const popDyn=[
  {cat:"社会動態",item:"転入者数",v:"27,712人",y:"2025年",note:"住民基本台帳人口移動報告"},
  {cat:"社会動態",item:"転出者数",v:"33,306人",y:"2025年",note:"同上"},
- {cat:"社会動態",item:"転入超過数",v:"-5,594人",y:"2025年",note:"16年連続の転出超過"},
- {cat:"社会動態",item:"うち20〜24歳の転出超過",v:"2,471人",y:"2025年",note:"流出全体の約59%"},
- {cat:"社会動態",item:"20〜24歳女性の転出超過率",v:"3.073%",y:"2025年",note:"10年間の悪化幅は全国ワースト1位"},
+ {cat:"社会動態",item:"転出超過数（＝転出−転入）",v:"5,594人",y:"2025年",warn:true,note:"総務省の公式表記は「転入超過数 −5,594人」。日本人＋外国人・都道府県間移動"},
+ {cat:"社会動態",item:"うち日本人の転出超過数",v:"4,168人",y:"2025年",warn:true,note:"2013年以降13年連続の転出超過"},
+ {cat:"社会動態",item:"うち20〜24歳の転出超過",v:"2,471人",y:"2025年",warn:true,note:"日本人。流出全体の約59%"},
+ {cat:"社会動態",item:"20〜24歳女性の転出超過率",v:"3.073%",y:"2025年",warn:true,note:"10年間の悪化幅は全国ワースト1位"},
  {cat:"自然動態",item:"出生数",v:"10,926人",y:"2024年",note:"人口動態統計(概数)"},
  {cat:"自然動態",item:"死亡数",v:"25,573人",y:"2024年",note:"同上"},
- {cat:"自然動態",item:"自然増減",v:"-14,647人",y:"2024年",note:"21年連続の自然減"},
+ {cat:"自然動態",item:"自然増減",v:"-14,647人",y:"2024年",warn:true,note:"21年連続の自然減"},
  {cat:"自然動態",item:"合計特殊出生率",v:"1.23",y:"2025年",note:"3年連続で過去最低"},
  {cat:"人口",item:"総人口（国勢調査速報）",v:"1,808,664人",y:"2025年10月",note:"社人研2025年推計を約2.3万人下回る"},
 ];
@@ -1450,16 +1467,15 @@ const firmsBranch=[
 ];
 
 // ===== ⑥ 大学別 入口・出口 =====
-const occCols=["専門的・技術的","事務","販売","サービス","生産工程","建設・採掘","その他"];
 const uni=[
- {name:"岡山大学",ret:31.3,retReal:true,retYear:"R7(2025)卒・学部就職者1,191名中373名",in:30.8,inReal:true,inYear:"H29(2017)入学",byOcc:[180,210,90,70,40,20,60]},
- {name:"岡山県立大学",ret:52.0,retReal:false,retYear:"推定（「半数程度」との自己評価記述のみ）",in:null,inReal:false,inYear:"公表なし",byOcc:[150,90,50,60,70,25,30]},
- {name:"岡山理科大学",ret:50.0,retReal:false,retYear:"公式サイト「約半数が地元で活躍」の概数",in:36.3,inReal:true,inYear:"2026入学・605/1,666名",byOcc:[130,110,80,70,160,90,50]},
- {name:"ノートルダム清心女子大学",ret:41.2,retReal:false,retYear:"推定",in:null,inReal:false,inYear:"公表なし",byOcc:[90,160,70,120,10,5,40]},
- {name:"岡山商科大学",ret:58.5,retReal:false,retYear:"推定",in:null,inReal:false,inYear:"公表なし",byOcc:[50,200,180,90,40,30,60]},
- {name:"中国学園大学",ret:66.0,retReal:false,retYear:"推定",in:71.9,inReal:true,inYear:"2022・在学生ベース",byOcc:[70,120,60,90,10,5,30]},
- {name:"環太平洋大学",ret:49.0,retReal:false,retYear:"推定",in:null,inReal:false,inYear:"公表なし",byOcc:[60,100,80,150,30,25,70]},
- {name:"津山工業高専",ret:7.1,retReal:true,retYear:"R6(2024)内定者112名中8名・本社所在地ベース",in:null,inReal:false,inYear:"公表なし",byOcc:[120,20,10,10,180,70,15]},
+ {name:"岡山大学",ret:31.3,retReal:true,retYear:"R7(2025)卒・学部就職者1,191名中373名",in:30.8,inReal:true,inYear:"H29(2017)入学"},
+ {name:"岡山県立大学",ret:52.0,retReal:false,retYear:"推定（「半数程度」との自己評価記述のみ）",in:null,inReal:false,inYear:"公表なし"},
+ {name:"岡山理科大学",ret:50.0,retReal:false,retYear:"公式サイト「約半数が地元で活躍」の概数",in:36.3,inReal:true,inYear:"2026入学・605/1,666名"},
+ {name:"ノートルダム清心女子大学",ret:41.2,retReal:false,retYear:"推定",in:null,inReal:false,inYear:"公表なし"},
+ {name:"岡山商科大学",ret:58.5,retReal:false,retYear:"推定",in:null,inReal:false,inYear:"公表なし"},
+ {name:"中国学園大学",ret:66.0,retReal:false,retYear:"推定",in:71.9,inReal:true,inYear:"2022・在学生ベース"},
+ {name:"環太平洋大学",ret:49.0,retReal:false,retYear:"推定",in:null,inReal:false,inYear:"公表なし"},
+ {name:"津山工業高専",ret:7.1,retReal:true,retYear:"R6(2024)内定者112名中8名・本社所在地ベース",in:null,inReal:false,inYear:"公表なし"},
 ];
 
 // ===== ⑦ 学部別 定員 =====
@@ -1530,9 +1546,24 @@ const univFaculty=[
  {u:"倉敷芸術科学大学",f:"芸術学部",cap:150,s:"芸術・デザイン系"},
  {u:"倉敷芸術科学大学",f:"生命科学部（環境生命・動物生命）",cap:90,s:"農学・生物系"},
  {u:"倉敷芸術科学大学",f:"生命科学部（健康科学・生命医科学）",cap:110,s:"医療・保健系"},
+ {u:"くらしき作陽大学",f:"音楽学部",cap:60,s:"芸術・デザイン系"},
+ {u:"くらしき作陽大学",f:"食文化学部（栄養・現代食文化）",cap:130,s:"生活科学・栄養系"},
+ {u:"くらしき作陽大学",f:"子ども教育学部",cap:80,s:"教育系"},
+ {u:"美作大学",f:"生活科学部（食物）",cap:80,s:"生活科学・栄養系"},
+ {u:"美作大学",f:"生活科学部（児童）",cap:80,s:"教育系"},
+ {u:"美作大学",f:"生活科学部（社会福祉）",cap:50,s:"医療・保健系"},
+ {u:"中国学園大学",f:"子ども学部",cap:100,s:"教育系"},
+ {u:"中国学園大学",f:"現代生活学部（人間栄養）",cap:80,s:"生活科学・栄養系"},
+ {u:"中国学園大学",f:"国際教養学部",cap:30,s:"人文系"},
+ {u:"川崎医科大学",f:"医学部（医学科）",cap:126,s:"医歯薬獣医系"},
+ {u:"岡山医療専門職大学",f:"健康科学部（理学療法）",cap:80,s:"医療・保健系"},
+ {u:"岡山医療専門職大学",f:"健康科学部（作業療法）",cap:30,s:"医療・保健系"},
+ {u:"山陽学園大学",f:"看護学部",cap:76,s:"医療・保健系"},
+ {u:"山陽学園大学",f:"地域マネジメント学部",cap:48,s:"社会科学系"},
  {u:"新見公立大学",f:"健康科学部（看護）",cap:80,s:"医療・保健系"},
  {u:"新見公立大学",f:"健康科学部（健康保育）",cap:50,s:"教育系"},
  {u:"新見公立大学",f:"健康科学部（地域福祉）",cap:50,s:"医療・保健系"},
+ {u:"岡山学院大学",f:"人間生活学部（食物栄養）",cap:40,s:"生活科学・栄養系"},
 ];
 // 大学別 入学定員（18大学）
 const univCapacity=[
@@ -1546,14 +1577,14 @@ const univCapacity=[
  {name:"岡山商科大学",cap:450,real:false,src:"民間進学情報サイト（要再確認）"},
  {name:"岡山県立大学",cap:370,real:true,src:"学則 第3条第5項（令和8年度）"},
  {name:"倉敷芸術科学大学",cap:350,real:true,src:"公式「学生数」（2026年度）"},
- {name:"くらしき作陽大学",cap:382,real:false,src:"収容定員1,528÷4（概算）"},
- {name:"山陽学園大学",cap:228,real:false,src:"収容定員912÷4（概算）"},
- {name:"美作大学",cap:220,real:false,src:"収容定員878÷4（概算）"},
- {name:"中国学園大学",cap:212,real:false,src:"収容定員848÷4（概算）"},
- {name:"新見公立大学",cap:180,real:false,src:"民間進学情報サイト（要再確認）"},
- {name:"川崎医科大学",cap:142,real:false,src:"収容定員850÷6（医学科・概算）"},
- {name:"岡山医療専門職大学",cap:80,real:false,src:"理学療法40＋作業療法40（概算）"},
- {name:"岡山学院大学",cap:40,real:false,src:"収容定員160÷4（概算）"},
+ {name:"くらしき作陽大学",cap:270,real:true,src:"公式・進学情報（音楽60／食文化130／子ども教育80）"},
+ {name:"山陽学園大学",cap:124,real:true,src:"2027年度入試（看護76／地域マネジメント48）"},
+ {name:"美作大学",cap:210,real:true,src:"生活科学部（食物80／児童80／社会福祉50）"},
+ {name:"中国学園大学",cap:210,real:false,src:"子ども100／現代生活80は実データ、国際教養30は推定"},
+ {name:"新見公立大学",cap:180,real:false,src:"健康科学部（看護80／健康保育50／地域福祉50）要確認"},
+ {name:"川崎医科大学",cap:126,real:false,src:"医学部医学科（要確認）"},
+ {name:"岡山医療専門職大学",cap:110,real:true,src:"健康科学部（理学療法80／作業療法30）"},
+ {name:"岡山学院大学",cap:40,real:false,src:"人間生活学部 食物栄養学科（要確認）"},
 ];
 // 18歳人口推計（社人研 令和5年推計・15-19歳÷5）
 const pop18=[
@@ -1581,7 +1612,7 @@ const kpiHtml=k=>k.map(x=>`<div class="kpi"><div class="l">${x.l}</div><div clas
  const stats=[
   {l:"総人口（2025 国調速報）",v:(census2025/10000).toFixed(1)+' 万人'},
   {l:"2050年 総人口（推計）",v:(p2050.tot/10).toFixed(1)+' 万人'},
-  {l:"転出超過（2025年）",v:'-5,594 人'},
+  {l:"転出超過（2025年）",v:'5,594 人'},
   {l:"有効求人倍率（2026/6）",v:latest.ok.toFixed(2)+' 倍'},
   {l:"大学等進学率（2025）",v:'57.8 %'},
   {l:"2040年 定員充足率",v:'65.8 %'},
@@ -1597,7 +1628,7 @@ const kpiHtml=k=>k.map(x=>`<div class="kpi"><div class="l">${x.l}</div><div clas
   {l:"総人口（2025年 国勢調査速報）",v:(census2025/10000).toFixed(1)+"万人",d:"社人研推計を約2.3万人下回る",cls:'up'},
   {l:"2050年 総人口（社人研推計）",v:(p50.tot/10).toFixed(1)+"万人",d:((p50.tot/p20.tot-1)*100).toFixed(1)+"%（2020年比）",cls:'up'},
   {l:"2040年 生産年齢人口（15-64歳）",v:(p40.c1564/10).toFixed(1)+"万人",d:((p40.c1564/p20.c1564-1)*100).toFixed(1)+"%（2020年比）",cls:'up'},
-  {l:"転入超過数（2025年）",v:"-5,594人",d:"16年連続の転出超過",cls:'up'},
+  {l:"転出超過数（2025年）",v:"5,594人",d:"日本人分は4,168人・13年連続",cls:'up'},
   {l:"自然増減（2024年）",v:"-14,647人",d:"出生10,926／死亡25,573",cls:'up'},
  ];
  document.getElementById('popKpis').innerHTML=kpiHtml(k);
@@ -1641,7 +1672,7 @@ const kpiHtml=k=>k.map(x=>`<div class="kpi"><div class="l">${x.l}</div><div clas
    scales:{x:{...cAxis,title:{display:true,text:'転入超過数（人）　−＝岡山から流出',color:'#8fa3b5'}},y:{ticks:{color:'#eef3f8',font:{size:11}},grid:{display:false}}}}});
 
  document.querySelector('#popDynTable tbody').innerHTML=popDyn.map(d=>{
-  const neg=String(d.v).startsWith('-');
+  const neg=d.warn||String(d.v).startsWith('-');
   return `<tr><td>${d.cat}</td><td style="text-align:left">${d.item}</td><td style="font-weight:700;color:${neg?'var(--short)':'var(--text)'}">${d.v}</td><td>${d.y}</td><td style="text-align:left;font-size:11.5px;color:var(--muted)">${d.note}</td></tr>`;
  }).join('');
 })();
@@ -1831,10 +1862,73 @@ const relOf={};strategy17.forEach(s=>relOf[s.field]=s.rel);
 })();
 
 // ========== ⑥ 大学別 県内就職状況 ==========
-(function(){let max=0;uni.forEach(u=>u.byOcc.forEach(v=>max=Math.max(max,v)));
- let h='<table class="heat"><thead><tr><th style="background:var(--panel)">大学＼職種</th>'+occCols.map(c=>`<th style="background:var(--panel)">${c}</th>`).join('')+'<th style="background:var(--panel)">計</th></tr></thead><tbody>';
- uni.forEach(u=>{const tot=u.byOcc.reduce((a,b)=>a+b,0);h+=`<tr><td style="text-align:left;color:#eef3f8;background:var(--panel2);border:1px solid var(--bg)">${u.name}</td>`;u.byOcc.forEach(v=>{const al=0.12+0.85*(v/max);h+=`<td style="background:rgba(51,200,139,${al.toFixed(2)})">${v}</td>`;});h+=`<td style="background:var(--panel2);color:#eef3f8">${tot}</td></tr>`;});
- document.getElementById('heatmap').innerHTML=h+'</tbody></table>';})();
+(function(){
+ // ===== ダミー推計モデル：学部構成 → 戦略17分野 × 職種 =====
+ const FS=["AI半導体","サイバー","情報通信","量子","防衛","航空宇宙","海洋","造船","素材","創薬医療","バイオ","エネGX","核融合","防災","港湾","フードテック","コンテンツ"];
+ // 学部系統 → 戦略分野への配分係数（合計1.0未満の残余は「17分野外」として計上しない）
+ const AFF={
+  "理工系":        {0:.14,2:.10,8:.26,7:.06,11:.10,13:.16,5:.03,6:.03,4:.02,14:.04,3:.01,12:.01},
+  "情報系":        {2:.42,1:.16,0:.18,16:.10,14:.06,9:.04,3:.02},
+  "医療・保健系":   {9:.90,10:.05,15:.05},
+  "医歯薬獣医系":   {9:.78,10:.14,15:.08},
+  "農学・生物系":   {15:.46,10:.30,9:.10,11:.08,6:.06},
+  "生活科学・栄養系":{15:.72,9:.20,16:.08},
+  "社会科学系":     {14:.24,16:.16,8:.14,2:.12,9:.10,15:.10,13:.08,11:.06},
+  "人文系":        {16:.40,2:.16,9:.14,14:.12,15:.10,8:.08},
+  "教育系":        {9:.34,15:.20,16:.24,2:.12,13:.10},
+  "芸術・デザイン系":{16:.72,2:.14,8:.08,13:.06},
+  "体育・スポーツ系":{9:.44,16:.24,15:.16,14:.16},
+ };
+ // 学部系統ごとの技術職比率（残りが事務職）
+ const TECH={"理工系":.82,"情報系":.84,"医療・保健系":.88,"医歯薬獣医系":.90,"農学・生物系":.68,
+  "生活科学・栄養系":.60,"社会科学系":.12,"人文系":.10,"教育系":.30,"芸術・デザイン系":.35,"体育・スポーツ系":.18};
+ const JOB_RATE=0.80;                 // 定員に対する就職者の割合
+ const retByName={}; uni.forEach(u=>{ if(u.retReal) retByName[u.name]=u.ret/100; });
+ const DEFAULT_RET=0.408;             // 県平均 大卒県内就職率
+
+ // 大学 × 分野 × 職種 の推計値を構築
+ const univs=univCapacity.slice().sort((a,b)=>b.cap-a.cap).map(u=>u.name);
+ const data={};                       // data[大学][分野] = {a:事務, t:技術}
+ univs.forEach(n=>{ data[n]={}; for(let i=0;i<17;i++) data[n][i]={a:0,t:0}; });
+ univFaculty.forEach(f=>{
+  const ret = retByName[f.u]!==undefined ? retByName[f.u] : DEFAULT_RET;
+  const local = f.cap*JOB_RATE*ret;   // その学部からの県内就職者数
+  const aff=AFF[f.s]||{}, tr=TECH[f.s]!==undefined?TECH[f.s]:.5;
+  for(const k in aff){ const v=local*aff[k];
+   data[f.u][k].t += v*tr; data[f.u][k].a += v*(1-tr); }
+ });
+
+ let mode='all';
+ const val=(n,i)=>{const d=data[n][i]; return Math.round(mode==='admin'?d.a:mode==='tech'?d.t:d.a+d.t);};
+ function render(){
+  let max=0; univs.forEach(n=>{for(let i=0;i<17;i++) max=Math.max(max,val(n,i));});
+  let grand=0;
+  let h='<table class="heat" style="min-width:1000px"><thead><tr><th style="background:var(--panel);min-width:150px">大学＼分野</th>'
+       +FS.map(c=>`<th style="background:var(--panel);font-size:10px;white-space:nowrap">${c}</th>`).join('')
+       +'<th style="background:var(--panel)">計</th></tr></thead><tbody>';
+  const colTot=Array(17).fill(0);
+  univs.forEach(n=>{
+   let tot=0;
+   h+=`<tr><td style="text-align:left;color:#eef3f8;background:var(--panel2);border:1px solid var(--bg);font-size:11px;white-space:nowrap">${n}</td>`;
+   for(let i=0;i<17;i++){ const v=val(n,i); tot+=v; colTot[i]+=v;
+    const al=max?0.08+0.88*(v/max):0.08;
+    h+=`<td style="background:rgba(51,200,139,${al.toFixed(2)});font-size:11px" title="${n}／${FIELDS17[i]}：${v}人">${v||''}</td>`; }
+   grand+=tot;
+   h+=`<td style="background:var(--panel2);color:#eef3f8;font-weight:700">${tot}</td></tr>`;
+  });
+  h+=`<tr style="font-weight:800"><td style="text-align:left;background:var(--panel3);color:#eef3f8">18大学 計</td>`
+   +colTot.map(v=>`<td style="background:var(--panel3);color:#eef3f8;font-size:11px">${v}</td>`).join('')
+   +`<td style="background:var(--panel3);color:#eef3f8">${grand}</td></tr>`;
+  document.getElementById('heatmap').innerHTML=h+'</tbody></table>';
+  const label=mode==='admin'?'事務職':mode==='tech'?'技術職':'合計';
+  document.getElementById('heatTotal').textContent=`表示中：${label}／推計 県内就職者 ${grand.toLocaleString()}人（17分野に該当する就職のみ）`;
+ }
+ document.querySelectorAll('[data-occ]').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('[data-occ]').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active'); mode=b.dataset.occ; render();
+ }));
+ render();
+})();
 
 new Chart(document.getElementById('uniRetain'),{type:'bar',data:{labels:uni.map(u=>u.name+(u.retReal?'':'*')),datasets:[{label:'県内定着率(%)',data:uni.map(u=>u.ret),backgroundColor:uni.map(u=>u.retReal?'rgba(51,200,139,.85)':(u.ret>=40.8?'rgba(180,140,255,.6)':'rgba(255,107,111,.6)'))}]},
  options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.raw+'%（県平均40.8%）',afterLabel:c=>uni[c.dataIndex].retYear}}},scales:{x:{...cAxis},y:{ticks:{color:'#eef3f8',font:{size:11}}}}}});
@@ -1863,7 +1957,7 @@ document.querySelector('#uniInOutTable tbody').innerHTML=uni.map(u=>{
  const p2040=pop18.find(p=>p.y===2040).v,p2025=pop18.find(p=>p.y===2025).v;
 
  const k=[
-  {l:"県内18大学 入学定員 合計",v:capTotal18.toLocaleString()+"人",d:"うち学部別内訳判明 "+facTotal.toLocaleString()+"人（11大学）"},
+  {l:"県内18大学 入学定員 合計",v:capTotal18.toLocaleString()+"人",d:"18大学・"+univFaculty.length+"学部の内訳を収録"},
   {l:"2040年 18歳人口（推計）",v:p2040.toLocaleString()+"人",d:((p2040/p2025-1)*100).toFixed(1)+"%（2025年比）",cls:'up'},
   {l:"2040年 入学定員充足率",v:(fillRate2040*100).toFixed(1)+"%",d:"文科省 岡山県推計",cls:'up'},
   {l:"2040年 推定入学者数",v:proj2040.toLocaleString()+"人",d:"定員×65.8%"},
@@ -1905,7 +1999,7 @@ document.querySelector('#uniInOutTable tbody').innerHTML=uni.map(u=>{
   const st=list.reduce((x,y)=>x+y.cap,0),sp=Math.round(st*fillRate2040);
   html+=`<tr style="font-weight:700;background:var(--panel2)"><td colspan="3" style="text-align:left">${u} 小計</td><td>${st.toLocaleString()}人</td><td style="color:var(--short)">${sp.toLocaleString()}人</td><td style="color:var(--short)">-${(st-sp).toLocaleString()}人</td></tr>`;
  });
- html+=`<tr style="font-weight:800;background:var(--panel3)"><td colspan="3" style="text-align:left">11大学 合計</td><td>${facTotal.toLocaleString()}人</td><td style="color:var(--short)">${Math.round(facTotal*fillRate2040).toLocaleString()}人</td><td style="color:var(--short)">-${(facTotal-Math.round(facTotal*fillRate2040)).toLocaleString()}人</td></tr>`;
+ html+=`<tr style="font-weight:800;background:var(--panel3)"><td colspan="3" style="text-align:left">18大学 合計</td><td>${facTotal.toLocaleString()}人</td><td style="color:var(--short)">${Math.round(facTotal*fillRate2040).toLocaleString()}人</td><td style="color:var(--short)">-${(facTotal-Math.round(facTotal*fillRate2040)).toLocaleString()}人</td></tr>`;
  document.querySelector('#facultyTable tbody').innerHTML=html;
 
  // 大学別 テーブル
@@ -1920,6 +2014,7 @@ document.querySelector('#uniInOutTable tbody').innerHTML=uni.map(u=>{
 // ========== タブ ==========
 const tabMap={pop:'tab-pop',edu:'tab-edu',ind:'tab-ind',skill:'tab-skill',firm:'tab-firm',uni:'tab-uni',sim:'tab-sim'};
 document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{
+ if(!t.dataset.tab||!tabMap[t.dataset.tab])return;   // タブ以外のボタンが紛れ込んでも壊さない
  document.querySelectorAll('.tab').forEach(x=>{x.classList.remove('active');x.setAttribute('aria-selected','false');});
  t.classList.add('active');t.setAttribute('aria-selected','true');
  Object.values(tabMap).forEach(id=>document.getElementById(id).classList.add('hide'));
