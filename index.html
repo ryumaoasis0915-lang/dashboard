@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>おかやま人材需給ギャップ ダッシュボード v0.9 / OLIVE</title>
+<title>おかやま人材需給ギャップ ダッシュボード v1.6 / OLIVE</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
   :root{
@@ -20,7 +20,7 @@
     --radius:12px;--radius-sm:8px;
     --shadow:0 4px 16px rgba(0,0,0,.28);
     --shadow-sm:0 2px 8px rgba(0,0,0,.22);
-    --sidebar-w:264px;
+    --sidebar-w:264px;--header-h:88px;
   }
   *{box-sizing:border-box}
   html{scroll-behavior:smooth}
@@ -47,8 +47,8 @@
 
   .mobiletoggle{display:none;background:var(--panel2);border:1px solid var(--line);color:var(--text);border-radius:8px;padding:8px 12px;font-size:13px;cursor:pointer}
 
-  .wrap{display:flex;min-height:calc(100vh - 88px);position:relative}
-  .side{width:var(--sidebar-w);flex-shrink:0;background:var(--panel);border-right:1px solid var(--line);padding:18px;position:sticky;top:88px;align-self:flex-start;height:calc(100vh - 88px);overflow:auto}
+  .wrap{display:flex;min-height:calc(100vh - var(--header-h));position:relative}
+  .side{width:var(--sidebar-w);flex-shrink:0;background:var(--panel);border-right:1px solid var(--line);padding:18px;position:sticky;top:var(--header-h);align-self:flex-start;height:calc(100vh - var(--header-h));overflow:auto}
   .side h3{font-size:11px;color:var(--muted2);text-transform:uppercase;letter-spacing:1.2px;margin:18px 0 8px;font-weight:700}
   .side h3:first-child{margin-top:0}
   .field{position:relative}
@@ -63,7 +63,7 @@
   .glossary-item{display:flex;gap:8px;align-items:flex-start;font-size:11.5px;color:var(--muted);padding:6px 0;line-height:1.5}
   .glossary-item .tag{margin:0;flex-shrink:0}
 
-  main{flex:1;padding:20px 26px 60px;overflow:auto;min-width:0}
+  main{flex:1;padding:20px 26px 60px;overflow:visible;min-width:0}
   .insight{display:flex;gap:10px;align-items:center;background:linear-gradient(90deg,var(--accent-soft),transparent);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:16px;font-size:13px;color:#cfe6ff;line-height:1.7}
   .insight b{color:#fff}
 
@@ -75,13 +75,25 @@
   .kpi .d{font-size:11px;margin-top:3px;color:var(--muted);line-height:1.4}
   .kpi .d.up{color:var(--short)}.kpi .d.down{color:var(--over)}
 
-  .tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;position:sticky;top:88px;z-index:20;background:var(--bg);padding:8px 0;border-bottom:1px solid var(--line-soft)}
+  /* タブ帯：mainの左右パディングまで食い込ませて全幅で覆う（KPIカードの透けを防ぐ） */
+  .tabs{display:flex;gap:6px;margin:-20px -26px 16px;flex-wrap:wrap;position:sticky;top:var(--header-h);z-index:25;
+        background:var(--bg);padding:12px 26px;border-bottom:1px solid var(--line);box-shadow:0 10px 14px -10px rgba(0,0,0,.75)}
   .tab{padding:9px 15px;background:var(--panel);border:1px solid var(--line);border-radius:9px;cursor:pointer;font-size:13px;color:var(--muted);transition:all .15s;white-space:nowrap}
   .tab:hover{border-color:var(--accent);color:var(--text)}
   .tab.active{background:var(--accent);color:#04121f;font-weight:700;border-color:var(--accent);box-shadow:0 2px 10px rgba(62,166,255,.35)}
   .segbtn{padding:7px 14px;background:var(--panel2);border:1px solid var(--line);border-radius:9px;cursor:pointer;font-size:12px;color:var(--muted);transition:all .15s;white-space:nowrap;font-family:inherit}
   .segbtn:hover{border-color:var(--accent);color:var(--text)}
   .segbtn.active{background:var(--accent);color:#04121f;font-weight:700;border-color:var(--accent)}
+  /* タレントフロー */
+  .flowrow{display:flex;align-items:stretch;gap:0;margin:6px 0 2px;border-radius:var(--radius-sm);overflow:hidden;min-height:46px}
+  .flowseg{display:flex;flex-direction:column;justify-content:center;padding:7px 10px;font-size:11.5px;line-height:1.35;color:#04121f;font-weight:700;position:relative;min-width:0}
+  .flowseg small{display:block;font-weight:600;font-size:10.5px;opacity:.78}
+  .flowlabel{font-size:12px;color:var(--muted);margin-top:10px;display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+  .flowlabel b{color:var(--text);font-size:13px}
+  .stagebox{background:var(--panel2);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:14px}
+  .stagebox h4{margin:0 0 10px;font-size:13px;color:var(--text)}
+  .bignum{font-size:26px;font-weight:800;letter-spacing:.3px}
+  .unk{background:repeating-linear-gradient(45deg,rgba(143,163,181,.30),rgba(143,163,181,.30) 6px,rgba(143,163,181,.14) 6px,rgba(143,163,181,.14) 12px);color:var(--muted)!important}
 
   section{animation:fadein .25s ease}
   @keyframes fadein{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
@@ -131,6 +143,20 @@
   .note-mock{background:var(--warn-soft);border:1px solid rgba(255,176,32,.3);color:#ffd98a}
   .note-est{background:var(--est-soft);border:1px solid rgba(168,120,255,.3);color:#d6bcff}
   .empty{color:var(--muted);font-size:12.5px;padding:20px;text-align:center}
+  /* 全体サマリー */
+  .flowgrid{display:grid;grid-template-columns:1fr auto 1fr auto 1fr auto 1fr;gap:0;align-items:stretch}
+  .flowcard{background:var(--panel2);border:1px solid var(--line);border-radius:var(--radius-sm);padding:14px 15px}
+  .flowcard h4{margin:0 0 10px;font-size:12.5px;display:flex;align-items:center;gap:6px}
+  .flowcard .fnum{font-size:19px;font-weight:800;line-height:1.25;margin-bottom:3px}
+  .flowcard .fsub{font-size:11px;color:var(--muted);line-height:1.55;margin-bottom:10px}
+  .flowcard .fsub:last-child{margin-bottom:0}
+  .flowarrow{display:flex;align-items:center;justify-content:center;color:var(--muted2);font-size:20px;padding:0 8px}
+  .sumtable td:nth-child(3),.sumtable td:nth-child(4){font-weight:700}
+  .jump{display:inline-block;background:var(--panel3);border:1px solid var(--line);border-radius:6px;
+        padding:1px 8px;font-size:11px;color:var(--accent);cursor:pointer;font-weight:700}
+  .jump:hover{border-color:var(--accent)}
+  @media (max-width:1100px){ .flowgrid{grid-template-columns:1fr}
+    .flowarrow{padding:6px 0;transform:rotate(90deg)} }
 
   /* 出典ボックス */
   .srcbox{background:var(--panel2);border:1px solid var(--line-soft);border-left:3px solid var(--ok);border-radius:var(--radius-sm);padding:12px 14px;margin-top:14px;font-size:11.5px;line-height:1.9}
@@ -150,7 +176,8 @@
   }
   @media (max-width:860px){
     .mobiletoggle{display:inline-block}
-    .side{position:fixed;left:-280px;top:88px;height:calc(100vh - 88px);z-index:35;transition:left .2s;box-shadow:var(--shadow)}
+    .side{position:fixed;left:-280px;top:var(--header-h);height:calc(100vh - var(--header-h));z-index:35;transition:left .2s;box-shadow:var(--shadow)}
+    .tabs{margin:-20px -18px 16px;padding:10px 18px}
     .side.open{left:0}
     .kpis{grid-template-columns:repeat(2,1fr)}
     .actions{grid-template-columns:1fr}
@@ -168,7 +195,7 @@
   <div class="headrow">
     <div class="headleft">
       <button class="mobiletoggle" id="mobileToggle" aria-label="フィルタを開く">☰ フィルタ</button>
-      <h1>おかやま人材需給ギャップ ダッシュボード<span class="v">v0.9 / OLIVE</span></h1>
+      <h1>おかやま人材需給ギャップ ダッシュボード<span class="v">v1.6 / OLIVE</span></h1>
     </div>
     <div class="legend-chips">
       <span class="lchip real"><i></i>実データ</span>
@@ -181,18 +208,6 @@
 </header>
 <div class="wrap">
   <aside class="side" id="side">
-    <h3>職種を検索（③用）</h3>
-    <div class="field" id="searchField">
-      <input type="text" id="searchBox" placeholder="例）介護、建設、事務…">
-      <button class="clear" id="searchClear" aria-label="クリア">✕</button>
-    </div>
-
-    <h3>大分類フィルタ（③用）</h3>
-    <select id="majorFilter"><option value="all">すべて（約55職種）</option></select>
-
-    <h3>並び順（③用）</h3>
-    <select id="sortSel"><option value="desc">倍率が高い順（不足）</option><option value="asc">倍率が低い順（余剰）</option></select>
-
     <h3>岡山県の主要指標</h3>
     <div id="sideStats"></div>
 
@@ -205,9 +220,9 @@
     <div class="note note-chk sidebar-note">①②は社人研・総務省・文科省の公的統計。③④は岡山労働局／job tagの実数。⑤は正社員100人以上の全700社。⑥は一部実データ、⑦は文科省の県別推計をベース。</div>
   </aside>
   <main>
-    <div class="insight" id="insightBox"></div>
     <div class="tabs" role="tablist">
-      <div class="tab active" data-tab="pop" role="tab" aria-selected="true">① 将来人口推計</div>
+      <div class="tab active" data-tab="sum" role="tab" aria-selected="true">◎ 全体サマリー</div>
+      <div class="tab" data-tab="pop" role="tab" aria-selected="false">① 将来人口推計</div>
       <div class="tab" data-tab="edu" role="tab" aria-selected="false">② 将来進学者推計</div>
       <div class="tab" data-tab="ind" role="tab" aria-selected="false">③ 業種別ギャップ</div>
       <div class="tab" data-tab="skill" role="tab" aria-selected="false">④ 業種別スキルギャップ</div>
@@ -216,8 +231,74 @@
       <div class="tab" data-tab="sim" role="tab" aria-selected="false">⑦ 学部別 定員シミュレーション</div>
     </div>
 
+    <!-- ◎ 全体サマリー -->
+    <section id="tab-sum">
+      <div class="kpis" id="sumKpis1"></div>
+      <div class="kpis" id="sumKpis2"></div>
+
+      <div class="panel">
+        <h2>岡山県の構造 ― 4つの段階でつながっている<span class="tag tag-real">主要数値は実データ</span></h2>
+        <div class="hint">個々のタブで見ている数字は、独立した問題ではなく1本の流れです。どこか1か所を直しても、前後で漏れれば効果は出ません。</div>
+        <div class="flowgrid" id="flowDiagram"></div>
+        <div class="note note-chk" style="margin-top:16px" id="sumInsight"></div>
+      </div>
+
+      <div class="panel">
+        <h2>「配置」と「接続」― この2つを区別する<span class="tag tag-chk">分析の軸</span></h2>
+        <div class="hint">世界29事例の分析は、人口減少下で効いた政策と失敗した政策が<b>使った道具によってきれいに分かれる</b>と結論づけています。定員・組織・設備・拠点を動かす<b>「配置の政策」は拡大期には効くが縮小期には空振り</b>し、誰を採るか・どこで学びどこで働くかを設計する<b>「接続の政策」は母数が小さいほど一人あたりの効果が大きい</b>。このダッシュボードの各指標がどちらに属するかを整理しました。</div>
+        <div class="grid2">
+          <div class="chartbox" style="height:230px"><canvas id="allocChart"></canvas></div>
+          <div class="stagebox" style="border-left-color:var(--ok)">
+            <h4>読み方</h4>
+            <div style="font-size:12px;color:var(--muted);line-height:1.75">
+            <b style="color:var(--est)">配置の指標</b>は「どれだけ足りないか／余るか」を測ります。現状把握には不可欠ですが、<b>その数字を改善しようとして定員や組織を動かしても、縮小期には効かない</b>というのが29事例の結論です。<br><br>
+            <b style="color:var(--ok)">接続の指標</b>は「誰を採り、どこで学び、どこで働き、留まったか」を測ります。<b>打ち手の対象になるのはこちら側</b>です。<br><br>
+            本ダッシュボードは配置側の指標から作り始めたため、現状では配置に寄っています。⑥のタレントフロー、③の賃金、④の4象限が接続側にあたります。
+            </div>
+          </div>
+        </div>
+        <table id="allocTable" style="margin-top:16px"><thead><tr><th>タブ</th><th>指標</th><th>区分</th><th>なぜその区分か</th></tr></thead><tbody></tbody></table>
+      </div>
+
+      <div class="panel">
+        <h2>主要パラメータ一覧<span class="tag tag-real">実データ</span><span class="tag tag-est">一部 推計</span></h2>
+        <div class="hint">各タブの中核となる数値を1枚に集約しました。「参照」列のボタンで該当タブへ移動します。</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+          <select id="sumCatSel" style="max-width:220px"><option value="all">すべてのカテゴリ</option></select>
+        </div>
+        <table class="sumtable" id="sumTable"><thead><tr><th>区分</th><th>指標</th><th>現在値</th><th>将来値・目標</th><th>参照</th><th>データ</th></tr></thead><tbody></tbody></table>
+      </div>
+
+      <div class="grid2">
+        <div class="panel">
+          <h2>データの充足状況<span class="tag tag-chk">自己点検</span></h2>
+          <div class="hint">ビジョン文書 表19・表10の「測れない範囲は測れないと明記する」という作法に従い、収録データを区分別に集計しています。</div>
+          <div class="chartbox" style="height:260px"><canvas id="dataQualityChart"></canvas></div>
+        </div>
+        <div class="panel">
+          <h2>OLIVEの主要KPIとの対応<span class="tag tag-chk">参考</span></h2>
+          <div class="hint">申請書の指標①〜⑦のうち、本ダッシュボードで現況値を追える指標と、その現在地。</div>
+          <table id="kpiMiniTable"><thead><tr><th>指標</th><th>現在地</th><th>R10目標</th><th>状態</th></tr></thead><tbody></tbody></table>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>未測定リスト ― 何が測れていないか<span class="tag tag-mock">未測定</span></h2>
+        <div class="hint">外部評価委員会がKPIを点検する際、「測り方の問題か、施策の問題か」を切り分けるための一覧です。ビジョン文書は、限界を先に書いておくことが「世界で最初に測った地域」と「都合のよい数字を並べた地域」を分けるとしています。</div>
+        <table id="gapsTable"><thead><tr><th>タブ</th><th>測れていないもの</th><th>状況・入手経路</th></tr></thead><tbody></tbody></table>
+      </div>
+
+      <div class="srcbox">
+        <h4>◎ の出典</h4>
+        <ul>
+          <li>本タブの数値はすべて①〜⑦の各タブから集約したものです。個別の出典は各タブ末尾の「出典」ボックスをご確認ください。</li>
+          <li>OLIVEの指標①〜⑦：おかやま地域未来共創プラットフォーム 申請書（様式2-1）／OLIVE骨子・ビジョン v4.0（表11・表17・表19）</li>
+        </ul>
+      </div>
+    </section>
+
     <!-- ① 将来人口推計 -->
-    <section id="tab-pop">
+    <section id="tab-pop" class="hide">
       <div class="kpis" id="popKpis"></div>
 
       <div class="note note-chk">出典は<b>国立社会保障・人口問題研究所（社人研）「日本の地域別将来推計人口（令和5(2023)年推計）」</b>および<b>総務省「住民基本台帳人口移動報告」</b>。都道府県別の社人研推計は<b>2050年まで</b>しか公表されていません（2070年までの推計は全国のみ）。なお2025年10月の国勢調査速報値は<b>1,808,664人</b>で、社人研の2025年推計（1,832千人）を約2.3万人下回っており、実際の減少は推計よりやや速いペースで進んでいます。</div>
@@ -225,12 +306,12 @@
       <div class="grid2">
         <div class="panel">
           <h2>岡山県 総人口の推移・推計（2020〜2050）<span class="tag tag-real">2020実績</span><span class="tag tag-est">2025〜推計</span></h2>
-          <div class="hint">年齢3区分（年少・生産年齢・高齢）別の積み上げ。2050年の総人口は2020年比 <b>80.0</b>（-20%）、生産年齢人口は <b>72.3</b>（-27.7%）まで落ち込みます。</div>
+          <div class="hint">年齢3区分（年少・生産年齢・高齢）別の積み上げ。<b>OLIVEのターゲット年である2040年</b>で見ると、総人口は164.6万人（2020年比 −12.8%／2025年比 −10.2%）、<b>生産年齢人口は88.7万人で2025年比 −15.2%</b>。これは申請書の「2040年の生産年齢人口は現在から約15%減少」と一致します。高齢化率は35.5%に達します。参考として2050年まで表示しています。</div>
           <div class="chartbox"><canvas id="popStack"></canvas></div>
         </div>
         <div class="panel">
           <h2>年齢3区分の指数推移（2020=100）<span class="tag tag-est">推計</span></h2>
-          <div class="hint">減少スピードの差が一目で分かります。生産年齢人口の落ち込みが総人口より急な＝支え手が先に減る構造です。</div>
+          <div class="hint">減少スピードの差が一目で分かります。生産年齢人口の落ち込みが総人口より急な＝支え手が先に減る構造です。縦の破線が<b>2040年</b>（OLIVEのターゲット年）です。</div>
           <div class="chartbox"><canvas id="popIndex"></canvas></div>
         </div>
       </div>
@@ -307,6 +388,42 @@
       </div>
 
       <div class="panel">
+        <h2>高校卒業後の進路 ― 供給の入口（Tier 2）<span class="tag tag-real">実データ</span></h2>
+        <div class="hint">OLIVEビジョン 表53は供給機関をTier 1（大学・専門学校）／Tier 2（高校・専門高校）／Tier 3に階層化します。令和7年3月の岡山県の高校卒業者 <b>15,172人</b> がどこへ向かったか。大学だけを見ていると、<b>専修学校2,459人と就職2,906人＝合計5,365人（35.4%）</b>を見落とすことになります。</div>
+        <div class="grid2">
+          <div class="chartbox"><canvas id="hsPathChart"></canvas></div>
+          <div class="chartbox"><canvas id="hsDeptChart"></canvas></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>高校生の県内就職 ― 大学より高いが、下がっている<span class="tag tag-real">実データ</span></h2>
+        <div class="hint">就職した2,873人のうち<b>県内2,310人（80.4%）</b>。大卒の県内就職率40.8%の約2倍で、<b>高卒は圧倒的に地元に残ります</b>。ただし申請書は「2012年約86% → 2026年80%未満」と低下を指摘しており、この水準は既に下降局面です。産業別では第2次産業が1,638人と最多で、うち県内1,351人（82.5%）。<b>製造業が高卒人材の最大の受け皿</b>になっています。</div>
+        <div class="chartbox" style="height:260px"><canvas id="hsJobChart"></canvas></div>
+      </div>
+
+      <div class="panel">
+        <h2>通信制高校の急拡大 ―「配置」ではなく「経路」の変化<span class="tag tag-real">実データ</span></h2>
+        <div class="hint">全日制が縮む一方で、通信制が受け皿になっています。これは学校を作る・畳むという<b>「配置」の話ではなく、生徒がどこで学ぶかという「経路」の変化</b>です。岡山県でも通信制は増加しており、②の進学者推計や⑦の定員シミュレーションの前提に影響します。</div>
+        <div class="kpis" id="tsushinKpis"></div>
+        <div class="note note-chk" id="tsushinInsight"></div>
+      </div>
+
+      <div class="panel">
+        <h2>岡山県の学科構成は全国と違う ― 専門学科が厚い<span class="tag tag-real">実データ</span></h2>
+        <div class="hint">全国の高校生は普通科74.1%・職業学科16.9%（482,854人）ですが、<b>岡山県は普通科60.9%・専門学科等39.1%</b>。全国より専門学科系が13.2ポイント厚く、これは岡山の構造的な強みです。AEW（アドバンスト・エッセンシャルワーカー）やものづくり人材の供給基盤として、他県より有利な位置にあります。</div>
+        <div class="chartbox" style="height:240px"><canvas id="deptCompareChart"></canvas></div>
+        <div class="note note-chk" style="margin-top:14px" id="deptInsight"></div>
+      </div>
+
+      <div class="panel">
+        <h2>専修学校（専門課程）― 見えていなかった第2の進路<span class="tag tag-real">実データ</span></h2>
+        <div class="hint">県内の専修学校は<b>49校・生徒8,524人</b>（うち専門課程8,396人）。分野別では<b>医療関係3,011人が最多</b>で、これはAEW（アドバンスト・エッセンシャルワーカー）4分野の主要な供給源が大学ではなく専修学校であることを示します。⑦の大学定員10,272人と並べて初めて、県内の高等教育の供給構造が見えます。</div>
+        <div class="chartbox" style="height:260px"><canvas id="senshuChart"></canvas></div>
+        <div class="note note-mock" style="margin-top:14px"><b>未取得：</b>①専修学校の<b>学科別入学定員</b>（大学については⑦で83学部分を収集済みですが、専修学校は在籍者数のみで定員が未取得です）。②<b>津山工業高等専門学校の学科別定員</b>（総合理工学科の4系＝先進科学系・機械システム系・電気電子システム系・情報システム系という構成までは確認済み）。③専修学校卒業生の<b>県内就職率</b>。Tier 1の供給量を正確に積み上げるには、これら3点の取得が必要です。</div>
+      </div>
+
+      <div class="panel">
         <h2>2040年 進学者推計（文部科学省 都道府県別推計）<span class="tag tag-real">文科省 公式推計</span></h2>
         <div class="hint">文科省が令和6年11月に公表した都道府県別推計。18歳人口が-34.6%減る一方、進学率の上昇（51.3%→58.5%）が減少幅を一部吸収し、県内大学入学者は-28%にとどまる見込みですが、<b>それでも入学定員充足率は65.8%まで低下</b>します。</div>
         <div class="chartbox" style="height:300px"><canvas id="mextChart"></canvas></div>
@@ -328,6 +445,56 @@
 
     <!-- ③ 業種別ギャップ -->
     <section id="tab-ind" class="hide">
+      <div class="kpis" id="gapKpis"></div>
+
+      <div class="note note-chk"><b>倍率だけでは政策の優先順位は決まりません。</b>建設躯体工事従事者は有効求人倍率16.59倍ですが、不足の実数は<b>265人</b>です。一方、一般事務従事者は0.27倍ですが、余剰の実数は<b>5,009人</b>にのぼります。同じ棒グラフに並べている限り「倍率が高い順に手を打つ」という誤った結論になりかねません。ここでは同じ岡山労働局データを<b>「人数」</b>に変換して見ます（有効求人数−有効求職者数）。これはOLIVEビジョン 表37「人材育成規模を『言える化』する4ステップ」の①マクロ需給ギャップの可視化に対応します。</div>
+
+      <div class="panel">
+        <h2>職種別 需給ギャップ（人数）<span class="tag tag-real">実データ</span></h2>
+        <div class="hint">有効求人数−有効求職者数。プラス（赤）＝人手不足、マイナス（青）＝求職超過。倍率では見えない「量」の構造が現れます。</div>
+        <div class="chartbox" style="height:900px"><canvas id="gapBar"></canvas></div>
+      </div>
+
+      <div class="panel">
+        <h2>倍率 × 規模 の二軸マップ<span class="tag tag-real">実データ</span></h2>
+        <div class="hint">横＝有効求人倍率（対数）、縦＝需給ギャップ人数、円の大きさ＝有効求人数。<b>右上＝「逼迫していて量も大きい」＝最優先領域</b>。右下は倍率が高くても量が小さく、左下は倍率が低く余剰が巨大な領域です。円にカーソルで職種名。</div>
+        <div class="chartbox" style="height:460px"><canvas id="gapScatter"></canvas></div>
+      </div>
+
+      <div class="panel">
+        <h2>賃金 ― 「人手不足なのに人が来ない」の説明変数<span class="tag tag-real">実データ</span><span class="tag tag-chk">全国値</span></h2>
+        <div class="note note-chk"><b>岡山県は全国平均を下回ります。</b>令和7年の全国計は<b>340.6千円</b>（所定内給与額・月額）で、これを上回ったのは<b>東京都・神奈川県・愛知県・大阪府の4都府県のみ</b>。最高は東京都の418.3千円で、全国平均比 +22.8%です。岡山県の具体値は下記のとおり未取得ですが、<b>4都府県に含まれない以上、全国平均340.6千円を下回ることは確定</b>しています。<br>
+        AEW（アドバンスト・エッセンシャルワーカー）の定義そのものが「デジタル技術等も活用して、<b>現在よりも高い賃金を得る</b>エッセンシャルワーカー」であり、指標⑥は「賃上げ達成企業30社」です。賃金を入れずにAEWも指標⑥も測れません。</div>
+        <div class="grid2">
+          <div class="chartbox" style="height:420px"><canvas id="wageIndChart"></canvas></div>
+          <div class="chartbox" style="height:420px"><canvas id="wageEduChart"></canvas></div>
+        </div>
+        <div class="grid2" style="margin-top:16px">
+          <div class="chartbox" style="height:220px"><canvas id="wageSizeChart"></canvas></div>
+          <div class="chartbox" style="height:220px"><canvas id="wageEmpChart"></canvas></div>
+        </div>
+        <div class="note note-chk" style="margin-top:14px" id="wageInsight"></div>
+        <div class="note note-mock" style="margin-top:14px"><b>未取得：岡山県の職種別・産業別の賃金実数。</b>上のグラフは<b>全国値</b>です。岡山県×職種のデータはe-Statの「賃金構造基本統計調査 一般_都道府県別_職種（特掲）DB」に存在しますが、今回はブラウザ経由での抽出まで到達できませんでした。これが入ると<b>「有効求人倍率 × 賃金」の散布図</b>が描け、「倍率が高いのに賃金が低い＝構造的に埋まらない職種」を特定できます。県内賃金と東京・大阪との差額は、20〜24歳の転出超過2,471人（①）を説明する最有力の変数です。</div>
+      </div>
+
+      <div class="panel">
+        <h2>2040年の就業構造推計<span class="tag tag-real">確定値</span><span class="tag tag-mock">業種別内訳は未測定</span></h2>
+        <div class="hint">申請書・ビジョン文書のファクトブック（表14）で使用が確定している数値です。</div>
+        <div class="grid2">
+          <div class="stagebox" style="border-left-color:var(--over)">
+            <h4>事務職等（文系的素養のみ）</h4>
+            <div class="bignum" style="color:var(--over)">約 5.6 万人 <span style="font-size:14px">余剰</span></div>
+            <div style="font-size:11.5px;color:var(--muted);margin-top:8px">2040年の就業構造推計。現在の需給でも一般事務▲5,009人・運搬清掃包装▲4,613人と、余剰は既に事務・軽作業に集中しています。</div>
+          </div>
+          <div class="stagebox" style="border-left-color:var(--short)">
+            <h4>高度現場人材（DX・GX・AX／AEW等）</h4>
+            <div class="bignum" style="color:var(--short)">約 5.5 万人 <span style="font-size:14px">不足</span></div>
+            <div style="font-size:11.5px;color:var(--muted);margin-top:8px">指標⑤（リスキリング）は、この5.6万人を5.5万人側へ移すための施策として設計されています。</div>
+          </div>
+        </div>
+        <div class="note note-mock" style="margin-top:14px"><b>未測定：業種別・職種別のブレークダウン。</b>ビジョン文書 表37①は、この2つの総量を「業種別・職種別（事務系／DX・GX・AX専門職／アドバンスト・エッセンシャルワーカー等）の過不足人数」へ分解することを求めていますが、<b>この分解はまだ行われていません</b>。実施主体は岡山経済研究所（シンクタンク機能）、使用予定データはRESAS・国の産業構造/雇用政策研究会推計です。分解が完了するまで、上のグラフは<b>「現在（令和8年5月）の求人求職ギャップ」であって2040年の推計ではない</b>点にご注意ください。</div>
+      </div>
+
       <div class="panel">
         <h2>岡山県 有効求人倍率の推移（直近12か月）<span class="tag tag-real">実データ</span></h2>
         <div class="hint">e-Stat 第11表-6。1.0超＝人手不足傾向、未満＝求職超過。傾向を押さえたうえで、下の中分類別の内訳を見ると打ち手の優先順位がつけやすくなります。</div>
@@ -339,9 +506,8 @@
       </div>
       <div class="panel">
         <h2>職業中分類別 有効求人倍率 <span class="tag tag-real">実データ</span> <span id="barCount" style="font-size:12px;color:var(--muted)"></span></h2>
-        <div class="hint">左のパネルで検索・大分類フィルタ・並び順を変更できます。1.0超＝不足(赤)／未満＝余剰(青)。バーをクリックで詳細。</div>
+        <div class="hint">1.0超＝人手不足(赤)／未満＝求職超過(青)。倍率の高い順。バーをクリックすると求人・求職の実数と需給ギャップを表示します。</div>
         <div id="indBarWrap"><canvas id="indBar"></canvas></div>
-        <div id="indEmpty" class="empty hide">該当する職種がありません。検索条件を見直してください。</div>
         <div class="drill hide" id="indDrill"></div>
       </div>
       <div class="panel">
@@ -367,19 +533,52 @@
 
     <!-- ④ 業種別スキルギャップ -->
     <section id="tab-skill" class="hide">
-      <div class="note note-chk">供給側は<b>実データ</b>（job tag＝日本版O-NET／JILPT・厚労省、職業別スキルレベルを0–100に正規化）。需要側は<b>岡山経済研究所アンケート</b>で同一のスキル項目に取得予定（対応表：skill_items_mapping.csv／スキル39＋知識33項目）。</div>
+      <div class="kpis" id="skillKpis"></div>
+
+      <div class="note note-chk">供給側は<b>実データ</b>（job tag＝日本版O-NET／JILPT・厚生労働省。職業別スキルレベルを0–100に正規化した上位8スキル）。需要側（企業が求めるレベル）は<b>岡山経済研究所アンケートで取得予定</b>のため、現時点では「需要−供給」の差分としてのギャップは計算できません。そこでこのタブでは、<b>③の有効求人倍率と組み合わせて「どの業種が、どういう性質の人手不足なのか」を分類</b>する構成にしています。</div>
+
       <div class="panel">
-        <h2>業種別 スキル供給プロファイル <span class="tag tag-real">供給=実データ</span><span class="tag tag-mock">需要=アンケート待ち</span></h2>
-        <div class="hint">業種を選ぶと、代表職業のスキル供給レベル（job tag実データ・上位8スキル）を表示。需要（企業が求めるレベル）はアンケート取得後にこの上へ重ねます。</div>
+        <h2>スキル要求水準 × 人手不足 の4象限マップ<span class="tag tag-real">実データ</span></h2>
+        <div class="hint">横軸＝その業種の代表職業に求められるスキルの平均レベル（job tag上位8スキルの平均・0-100）、縦軸＝③で見た関連職種の有効求人倍率（対数）。<b>同じ「人手不足」でも、スキルの壁が高いのか、条件の問題なのかで打ち手はまったく変わります。</b>円の大きさは関連職種の有効求人数。</div>
+        <div class="chartbox" style="height:440px"><canvas id="skillQuad"></canvas></div>
+        <div class="note note-chk" style="margin-top:14px" id="skillQuadInsight"></div>
+      </div>
+
+      <div class="panel">
+        <h2>スキル × 業種 ヒートマップ<span class="tag tag-real">実データ</span></h2>
+        <div class="hint">縦＝15のスキル項目、横＝6業種。色が濃いほど高いレベルが求められます。<b>空欄（－）は「その業種の上位8スキルに入らない」</b>という意味で、レベルが0という意味ではありません。左端の●は全6業種に共通するスキルです。</div>
+        <div class="heat-wrap"><div id="skillHeat"></div></div>
+      </div>
+
+      <div class="grid2">
+        <div class="panel">
+          <h2>共通スキルの業種間比較<span class="tag tag-real">実データ</span></h2>
+          <div class="hint">全6業種に共通する4スキル（傾聴力・説明力・読解力・指導）で重ねて比較。<b>どの業種でも土台は対人・言語スキル</b>であり、業種を移る際にこの部分は持ち運べます。リスキリングで上積みすべきは残りの固有スキルです。</div>
+          <div class="chartbox" style="height:380px"><canvas id="skillRadar"></canvas></div>
+        </div>
+        <div class="panel">
+          <h2>業種プロファイル一覧<span class="tag tag-real">実データ</span></h2>
+          <div class="hint">代表職業・平均スキルレベル・その業種に固有のスキル・関連職種の有効求人倍率。固有スキルが<b>リスキリングで新たに身につけるべき部分</b>にあたります。</div>
+          <div style="max-height:380px;overflow:auto"><table id="skillProfTable"><thead><tr><th>業種</th><th>平均<br>レベル</th><th>倍率</th><th>固有スキル（その業種のみ上位8入り）</th></tr></thead><tbody></tbody></table></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>業種別 スキル供給プロファイル（詳細）<span class="tag tag-real">実データ</span></h2>
+        <div class="hint">業種を選ぶと、代表職業に求められる上位8スキルのレベルを表示します。需要側が取得できた際は、この上に重ねて差分を表示する設計です。</div>
         <select id="skillIndustry" style="max-width:340px;margin-bottom:10px"></select>
         <div id="skillOcc" style="font-size:12px;color:var(--muted);margin-bottom:8px"></div>
-        <div class="chartbox" style="height:360px"><canvas id="skillBar"></canvas></div>
+        <div class="chartbox" style="height:330px"><canvas id="skillBar"></canvas></div>
       </div>
+
+      <div class="note note-mock"><b>未取得：需要側（企業が求めるスキルレベル）。</b>岡山経済研究所のアンケートで、job tagと同一のスキル項目（スキル39項目＋知識33項目、対応表 skill_items_mapping.csv）を用いて取得予定です。取得できれば、上の各グラフに需要側を重ねて<b>本来の意味での「スキルギャップ」（需要−供給）</b>を表示できます。<br>
+      また、OLIVEビジョン 表41は<b>「県内求人票のスキル語分析」を最優先のシグナル源</b>（主体：岡山大学内製＋岡山経済研究所）として挙げています。ハローワーク求人票からスキル語を抽出すれば、アンケートの完了を待たずに需要側の当たりをつけられます。</div>
 
       <div class="srcbox">
         <h4>④ の出典</h4>
         <ul>
           <li><b>職業別スキルレベル（供給側）</b>：job tag（職業情報提供サイト／日本版O-NET）― 厚生労働省・労働政策研究研修機構（JILPT） ― <a href="https://shigoto.mhlw.go.jp/User" target="_blank" rel="noopener">https://shigoto.mhlw.go.jp/User</a></li>
+          <li><b>関連職種の有効求人倍率・有効求人数</b>：岡山労働局「雇用情勢 令和8年5月分」（③と同一データ）</li>
           <li><b>需要側（企業が求めるスキルレベル）</b>：岡山経済研究所アンケートにて取得予定（未取得）</li>
         </ul>
       </div>
@@ -453,6 +652,31 @@
     <section id="tab-uni" class="hide">
       <div class="note note-chk">大学別の「県内就職率」を明示的に公表しているのは<b>岡山大学</b>と<b>津山工業高専</b>の2校のみでした（他6校は大学ポートレート・情報公開ページ・自己点検評価報告書等を調査しましたが未公表）。入学者の出身地内訳（入口）は岡山大学・岡山理科大学・中国学園大学の3校で実数を確認できました。それ以外は推定値（*印）です。</div>
 
+      <div class="panel">
+        <h2>タレントフロー：進学の「流出」とUターン<span class="tag tag-real">実データ</span><span class="tag tag-mock">一部 未測定</span></h2>
+        <div class="hint">OLIVEビジョン 表53「タレントフロー分析」の枠組み（Capture Rate／Leakage Rate／Pipeline Bandwidth）に沿って、岡山の人材の入口と出口を1枚で見ます。斜線のブロックは<b>測定できていない部分</b>です。</div>
+        <div class="kpis" id="flowKpis" style="margin-bottom:18px"></div>
+
+        <div class="stagebox">
+          <h4>ルート① 岡山県の高校出身者 ― どこへ進学し、どれだけ帰ってくるか</h4>
+          <div id="flowA"></div>
+        </div>
+        <div class="stagebox" style="border-left-color:var(--ok)">
+          <h4>ルート② 県外出身で岡山県内の大学へ入学した学生 ― どれだけ残るか</h4>
+          <div id="flowB"></div>
+        </div>
+
+        <table id="captureTable" style="margin-top:16px"><thead><tr><th>供給ルート（Tier 1）</th><th>規模<br><span style="font-weight:400;font-size:10px">Pipeline Bandwidth</span></th><th>県内定着率<br><span style="font-weight:400;font-size:10px">Capture Rate</span></th><th>県内に残る人数</th><th>流出人数<br><span style="font-weight:400;font-size:10px">Leakage</span></th><th>区分</th></tr></thead><tbody></tbody></table>
+
+        <div class="note note-chk" style="margin-top:14px" id="flowInsight"></div>
+
+        <div class="note note-mock" style="margin-top:14px"><b>測定の限界（ビジョン文書 表19・表10の作法に従い明記します）。</b>
+        ①Uターン就職率が判明しているのは<b>関東10.9%・近畿22.5%の2地域のみ</b>です。県外進学先で最大の中国四国（1,760人）は率が未測定のため、上表のUターン人数は<b>判明分の下限値</b>であり、実際はこれより多いと考えられます。<br>
+        ②Uターン率（様式2-1／入学者=令和3年度・就職率=令和6年度卒業者）と、進学先の地域別内訳（令和7年度学校基本調査）は<b>異なるコホート・異なる年次</b>です。構造の把握には使えますが、人数は概算としてお読みください。<br>
+        ③大学の就職先データは<b>卒業時点の内定先しか捉えられません</b>。卒業後に県外へ転出した者は追跡されず、逆に県外へ出た卒業生がUIJターンで戻った場合も捕捉されません。米国SLDSが累計9.34億ドルを投じてなお州外就業を捕捉できず、バージニア州SCHEVが「州外就労者は追跡できない」「賃金データを機関の質の測定に用いることは戒める」と自ら明記しているのと同じ制約です。<br>
+        ④この限界を埋める手段としてビジョン文書が想定しているのが<b>指標⑲（会員企業に就職した卒業生の3年後定着率）</b>です。会員企業からの匿名化データによってのみ、供給機関別のCapture Rate／Leakage Rateを継続測定できます。ただし捕捉できるのは会員企業に就職した卒業生に限られます。</div>
+      </div>
+
       <div class="grid2">
         <div class="panel">
           <h2>大学別 県内定着率（出口）<span class="tag tag-real">2校=実データ</span><span class="tag tag-mock">他=推定</span></h2>
@@ -473,6 +697,17 @@
           <b>「出身地×就職地」のクロス集計について：</b>ご要望のあった「県内出身者のうち県内/県外に就職した人数」「県外出身者のうち県内/県外に就職した人数」という4象限のクロス集計は、<b>8校のいずれについても公表資料から確認できませんでした</b>。大学が公表する統計は「入学者の出身地」と「就職者の就職先」をそれぞれ独立に集計したものがほとんどで、個々の学生について両者を結び付けた集計（学生単位のマイクロデータが必要）を開示している例は見つかりませんでした。<br><br>
           唯一、岡山大学は「出身県別×就職先県別」の47都道府県マトリクスをPDFで公表しており、そこから<b>Uターン率（出身県と就職県が一致した学部卒業者の割合）＝38.5%</b>（令和7年度、459人/1,191人）という実数が確認できます。ただしこれは「出身地を問わず自分の出身県に戻って就職した学生の割合（全国計）」であり、「岡山県出身者に限定した県内就職率」ではない点にご注意ください。<b>正確なクロス集計が必要な場合は、各大学キャリアセンターへの直接照会が現実的な入手経路になります。</b>
         </div>
+      </div>
+
+      <div class="panel">
+        <h2>定着の質 ― 新規学卒者の3年以内離職率<span class="tag tag-real">実データ</span><span class="tag tag-chk">全国値</span></h2>
+        <div class="hint">ビジョン文書の<b>中核3指標の第一は「会員企業に就職した卒業生の3年後定着率」（指標⑲）</b>ですが、これは会員制度が動き出すまで測れません。ここでは公表されている全国の3年以内離職率を<b>ベースライン・代理指標</b>として置きます。県内就職率を上げても3年で辞められては意味がない、という当たり前を数字で押さえるためのパネルです。</div>
+        <div class="grid2">
+          <div class="chartbox" style="height:300px"><canvas id="turnoverSizeChart"></canvas></div>
+          <div class="chartbox" style="height:300px"><canvas id="turnoverIndChart"></canvas></div>
+        </div>
+        <div class="note note-chk" style="margin-top:14px" id="turnoverInsight"></div>
+        <div class="note note-mock" style="margin-top:14px"><b>未取得：岡山県別の離職率。</b>厚生労働省は学歴別・事業所規模別・産業別を公表していますが、<b>都道府県別の公表は今回確認できませんでした</b>（一部の労働局が独自に公表している例はあります）。したがって上のグラフは全国値であり、岡山県の実態とは異なる可能性があります。指標⑲が動き出すまでの暫定的な参照値としてお使いください。</div>
       </div>
 
       <div class="panel">
@@ -545,6 +780,51 @@
         <table id="univCapTable"><thead><tr><th>大学名</th><th>入学定員</th><th>2040年目安</th><th>データ区分</th><th>出典・算出法</th></tr></thead><tbody></tbody></table>
       </div>
 
+      <div class="panel">
+        <h2>「配置の道具」の限界 ― 定員を埋めても地元定着は改善しない<span class="tag tag-real">実データ</span></h2>
+        <div class="hint">このタブが扱う定員・充足率は、世界29事例の分類でいう<b>典型的な「配置の指標」</b>です。定員を動かす政策が地域定着に届くのかを、日本国内の検証済み事例2つで確認します。</div>
+
+        <div class="grid2">
+          <div>
+            <div style="font-size:12.5px;color:var(--text);font-weight:700;margin-bottom:8px">① 私立大学の公立化 ― 高知工科大学の16年</div>
+            <div class="chartbox" style="height:300px"><canvas id="kochiChart"></canvas></div>
+          </div>
+          <div>
+            <div style="font-size:12.5px;color:var(--text);font-weight:700;margin-bottom:8px">② COC+（地〔知〕の拠点大学による地方創生推進事業）</div>
+            <div class="chartbox" style="height:300px"><canvas id="cocChart"></canvas></div>
+          </div>
+        </div>
+
+        <table id="kochiTable" style="margin-top:16px"><thead><tr><th>指標</th><th>公立化2年前<br>(H19)</th><th>公立化初年度<br>(H21)</th><th>16年目<br>(R6〜R7)</th><th>評価</th></tr></thead><tbody></tbody></table>
+
+        <div class="note note-chk" style="margin-top:14px" id="alloLimitInsight"></div>
+
+        <div class="note note-mock" style="margin-top:14px"><b>この2事例の位置づけ：</b>高知工科大学は志願者を回復させ定員を充足させるという<b>当初の目的は達成しています</b>。これは同大学の失敗ではなく、<b>設置者の変更という道具が「地域に人を残す」という目的には届かない</b>という構造の問題です。地方定着に最も効くのは地元出身者を採ることであり（オッズ比2.71、WHO 2021年ガイドラインで唯一の強い推奨）、公立化はその変数に触れていません。<br>
+        文部科学省は公立化した12大学について同形式のデータを公表しており（令和8年3月27日更新。その後、東北公益文科大学が令和8年4月に公立化し13大学）、他大学との比較検証が可能です。<b>本ダッシュボードでは高知工科大学（最長16年）のみ収録しており、残り11大学は未取得です。</b></div>
+
+        <div class="srcbox">
+          <h4>この項の出典</h4>
+          <ul>
+            <li><b>高知工科大学</b>：文部科学省「私立大学の公立化に際しての経済上の影響分析及び公立化効果の『見える化』に関するデータ」（令和8年3月27日更新） ― <a href="https://www.mext.go.jp/a_menu/koutou/kouritsu/1412396.htm" target="_blank" rel="noopener">一覧ページ</a>／<a href="https://www.mext.go.jp/content/20260327-mxt_daigakuc01_100001254_1.pdf" target="_blank" rel="noopener">高知工科大学PDF</a></li>
+            <li><b>COC+</b>：小山治「『地（知）の拠点大学による地方創生推進事業』（COC+）の結果、地域内就職者割合は増加したのか」『都市社会研究』第15号（2023年）</li>
+            <li><b>地方定着のオッズ比</b>：Ogden et al. 2020, MJA（27研究のメタ解析）／WHO 2021年ガイドライン</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>律速要因は「教える人」― 教員不足<span class="tag tag-real">実データ</span><span class="tag tag-chk">全国＋岡山県</span></h2>
+        <div class="hint">定員をどう配置するかを議論する前に、<b>それを教える人が確保できるのか</b>という制約があります。世界29事例の文書は「設備や施設ではなく、教える人が足りない」と明記しています。ここは全国値と岡山県の採用倍率で確認します。</div>
+        <div class="kpis" id="teacherKpis"></div>
+        <div class="grid2">
+          <div class="chartbox" style="height:260px"><canvas id="teacherOkaChart"></canvas></div>
+          <div class="chartbox" style="height:260px"><canvas id="teacherTypeChart"></canvas></div>
+        </div>
+        <div class="note note-chk" style="margin-top:14px" id="teacherInsight"></div>
+        <div class="note note-mock" style="margin-top:14px"><b>未取得：岡山県の教員不足の実数。</b>全国の「教師不足」実態調査は都道府県別の内訳を公表しておらず、岡山県で何人不足しているかは確認できていません。ここに掲載しているのは<b>採用倍率</b>（＝将来の不足の先行指標）です。<br>
+        なお、OLIVEビジョン第III部Sは<b>教職課程の共同維持</b>を私立大学への「負担軽減という実利から入る」連携の入口に位置づけており、県内で高校【書道】1校、中高【美術】私立1校、高校【情報】3校など<b>1〜3校に依存する教科がある</b>と記載されています。教員供給の細りは、⑦の定員議論と教職課程の連携の両方に効いてきます。</div>
+      </div>
+
       <div class="note note-est">
         <b>定員データの精度について：</b>今回、公式の学則・情報公開ページを一次資料として学部別定員を収集した結果、これまで概算で扱っていた数値と以下の乖離が判明したため、<b>公式値に修正しています</b>：岡山大学 2,335人→<b>2,191人</b>（令和8年度学則。環境理工学部は令和3年度に工学部へ統合済み、グローバル・ディスカバリー・プログラムは各学部定員の内数）／岡山県立大学 505人→<b>370人</b>（学則。収容定員1,480÷4と内的整合）／川崎医療福祉大学 1,186人→<b>1,126人</b>（2027年度募集人員。医療秘書学科→医療コミュニケーション学科への改組等を反映）。<br><br>
         <b>今回の拡張：</b>従来は11大学のみだった学部別内訳を、<b>18大学すべて</b>に拡張しました。追加した7大学のうち、くらしき作陽大学（音楽60／食文化130／子ども教育80＝270人）、美作大学（食物80／児童80／社会福祉50＝210人）、山陽学園大学（看護76／地域マネジメント48＝124人）、岡山医療専門職大学（理学療法80／作業療法30＝110人）は公式・入試要項ベースの実データです。中国学園大学は子ども学部100人・現代生活学部80人が実データ、国際教養学部30人のみ推定。川崎医科大学（医学科126人）・岡山学院大学（食物栄養40人）・新見公立大学（看護80／健康保育50／地域福祉50）は要確認です。<br><br><b>定員の下方修正：</b>収容定員÷標準修業年限による概算から実際の募集定員に置き換えた結果、くらしき作陽大学 382→270人、山陽学園大学 228→124人、川崎医科大学 142→126人と、いずれも下振れしました。これは各校が近年<b>すでに募集定員を縮小している</b>ことを示しており、2040年の定員割れは「これから起きること」ではなく、<b>すでに始まっている</b>と読むべきです。一方、岡山医療専門職大学は80→110人と増えており、医療・保健系は例外的に拡大局面にあります。</div>
@@ -569,7 +849,7 @@
 
     <div class="foot">
       <b>出典サマリー</b>：①将来人口＝社人研「日本の地域別将来推計人口（令和5年推計）」／総務省「住民基本台帳人口移動報告」／日本政策投資銀行 岡山事務所レポート／岡山県毎月流動人口調査。②進学＝岡山県学校基本調査／文科省「学校基本調査」「大学入学者数等の将来推計（R6.11）」／中教審答申（R7.2）／旺文社教育情報センター。③④＝岡山労働局「雇用情勢 令和8年5月分」／e-Stat 第11表-6／job tag（日本版O-NET）。⑤＝内閣府 戦略17分野／SalesNow DB（岡山県内・正社員100人以上の全695社）／県外本社事業所は各社公式資料。⑥＝各大学公表資料／OLIVE申請書。⑦＝文科省 都道府県別推計／各大学 学則・情報公開ページ。<br>
-      各タブ末尾の「出典」ボックスに個別のURLを掲載しています。数値の年次・定義（単独/連結、在学生/入学者、就職者ベース等）は資料により異なるため、対外資料への引用時は原典をご確認ください。© OLIVE 試作 v0.9
+      各タブ末尾の「出典」ボックスに個別のURLを掲載しています。数値の年次・定義（単独/連結、在学生/入学者、就職者ベース等）は資料により異なるため、対外資料への引用時は原典をご確認ください。© OLIVE 試作 v1.6
     </div>
   </main>
 </div>
@@ -1592,14 +1872,107 @@ const pop18=[
  {y:2040,v:12510,real:false},{y:2045,v:12137,real:false},{y:2050,v:11937,real:false},
 ];
 
+
+// ===== A-1 賃金（令和7年 賃金構造基本統計調査・所定内給与額・月額千円・男女計） =====
+// 出典: https://www.mhlw.go.jp/toukei/itiran/roudou/chingin/kouzou/z2025/dl/14.pdf
+const WAGE_NATION=340.6, WAGE_TOKYO=418.3;
+const wageIndustry=[
+ {n:"電気・ガス・熱供給・水道",v:444.0},{n:"学術研究，専門・技術サービス",v:440.3},
+ {n:"金融業，保険業",v:437.0},{n:"情報通信業",v:406.0},{n:"鉱業，採石業",v:388.3},
+ {n:"教育，学習支援業",v:379.4},{n:"建設業",v:366.3},{n:"不動産業，物品賃貸業",v:360.1},
+ {n:"卸売業，小売業",v:349.1},{n:"製造業",v:330.0},{n:"複合サービス事業",v:319.0},
+ {n:"医療，福祉",v:315.7},{n:"運輸業，郵便業",v:312.7},{n:"生活関連サービス業，娯楽業",v:295.2},
+ {n:"サービス業（他に分類されないもの）",v:284.9},{n:"宿泊業，飲食サービス業",v:277.2},
+];
+const wageEdu=[{n:"高校",all:297.2,fresh:207.3},{n:"専門学校",all:313.7,fresh:230.7},
+ {n:"高専・短大",all:321.2,fresh:235.5},{n:"大学",all:396.3,fresh:262.3},{n:"大学院",all:517.4,fresh:299.0}];
+const wageSize=[{n:"大企業（1,000人以上）",v:385.1},{n:"中企業（100〜999人）",v:326.2},{n:"小企業（10〜99人）",v:305.6}];
+const wageEmpType=[{n:"正社員・正職員",v:358.8},{n:"正社員・正職員以外",v:241.7}];
+
+// ===== A-2 高校＝Tier 2（令和7年度 岡山県学校基本調査・令和7年3月卒業者） =====
+// 出典: https://www.pref.okayama.jp/uploaded/life/1025333_9906671_misc.pdf
+const HS_GRAD=15172;
+const hsPath=[{n:"大学等へ進学",v:8771},{n:"専修学校（専門課程）へ進学",v:2459},{n:"就職者等",v:2906},
+ {n:"専修学校（一般課程）等",v:416},{n:"公共職業能力開発施設等",v:76},{n:"左記以外の者",v:544}];
+const HS_JOB_IN=2310, HS_JOB_OUT=563, HS_JOB_TOTAL=2873;
+const hsJobInd=[{n:"第2次産業",inp:1351,outp:287},{n:"第3次産業",inp:919,outp:262},
+ {n:"第1次産業",inp:19,outp:4},{n:"その他",inp:21,outp:10}];
+const hsDept=[{n:"普通科",v:28451},{n:"工業科",v:5412},{n:"商業科",v:5199},
+ {n:"総合学科",v:2458},{n:"農業科",v:1473},{n:"その他の専門学科",v:3707}];
+const HS_DEPT_TOTAL=46700;
+
+// ===== A-3 専修学校・各種学校（同上） =====
+const senshu={schools:49,students:8524,senmon:8396,koto:128,
+ fields:[{n:"医療関係",v:3011},{n:"文化・教養関係",v:1436},{n:"工業関係",v:1424},{n:"その他の分野",v:2653}]};
+
+// ===== A-4 新規学卒者の3年以内離職率（厚生労働省） =====
+// 最新公表=令和4年3月卒（2025年10月24日公表）／内訳=令和3年3月卒（2024年10月25日公表）
+const turnoverLatest=[{n:"中学",v:54.1},{n:"短大等",v:44.5},{n:"高校",v:37.9},{n:"大学",v:33.8}];
+const turnoverSize=[{n:"5人未満",hs:62.5,uni:59.1},{n:"5〜29人",hs:54.4,uni:52.7},
+ {n:"30〜99人",hs:45.3,uni:42.4},{n:"100〜499人",hs:37.1,uni:35.2},
+ {n:"500〜999人",hs:31.5,uni:32.9},{n:"1,000人以上",hs:27.3,uni:28.2}];
+const turnoverInd=[{n:"宿泊業，飲食サービス業",hs:65.1,uni:56.6},{n:"生活関連サービス業，娯楽業",hs:61.0,uni:53.7},
+ {n:"教育，学習支援業",hs:53.1,uni:46.6},{n:"医療，福祉",hs:49.3,uni:41.5},{n:"小売業",hs:48.6,uni:41.9}];
+
+
+// ===== 配置／接続の分類（世界29事例 表4） =====
+const alloConn=[
+ ["①","将来人口推計","配置の前提","人口・年齢構成は与件。打ち手の対象ではない"],
+ ["②","将来進学者推計","配置","進学者数・定員充足率＝母数の予測"],
+ ["②","高卒の県内就職率","接続","どこで学びどこで働くかの経路"],
+ ["③","有効求人倍率・需給ギャップ","配置","求人と求職の数の対比"],
+ ["③","賃金","接続","人が留まる条件。経路を成立させる要素"],
+ ["④","スキル4象限","接続","スキルの壁か条件かを切り分ける"],
+ ["⑤","戦略17分野 企業マップ","配置","企業数・従業員数＝受け皿の量"],
+ ["⑥","県内就職率・Uターン率","接続","入口と出口の接続そのもの"],
+ ["⑥","入口＝県内出身率","接続","地方定着に最も効く変数（オッズ比2.71）"],
+ ["⑥","3年以内離職率","接続","接続が持続したかのアウトカム"],
+ ["⑦","学部別入学定員","配置","定員＝席の数"],
+ ["⑦","2040年 定員充足率","配置","席が埋まるかどうか"],
+];
+
+// ===== 公立化の効果：高知工科大学16年（文科省「公立化効果の見える化」） =====
+// 出典: https://www.mext.go.jp/content/20260327-mxt_daigakuc01_100001254_1.pdf
+const kochiTech=[
+ {ph:"公立化2年前\n(H19)",apply:767,fill:0.81,inEnt:50.5,inJob:13.6,selfRev:76.9,burden:null},
+ {ph:"公立化初年度\n(H21)",apply:5812,fill:1.13,inEnt:33.0,inJob:26.0,selfRev:49.9,burden:3.7},
+ {ph:"16年目\n(R6-R7)",apply:2419,fill:1.03,inEnt:26.1,inJob:17.8,selfRev:39.1,burden:9.4},
+];
+// COC+（地(知)の拠点大学による地方創生推進事業）採択国立大16校の地域内就職者割合
+const cocPlus=[{y:"2014年度",v:37.2},{y:"2015〜19年度平均",v:36.2},{y:"2019年度",v:34.6}];
+
+// ===== 教員不足（律速要因） =====
+// 全国＝令和7年度「教師不足」実態調査／教員採用選考試験
+const teacherNation=[
+ {n:"公立学校の教員不足",v:"3,827人",d:"不足率0.45%。令和3年度2,065人から約1.9倍"},
+ {n:"うち高等学校",v:"508人",d:"不足率0.33%"},
+ {n:"教員採用倍率（全体）",v:"2.9倍",d:"過去最低。受験者109,123人も過去最少"},
+ {n:"教員採用倍率（高校）",v:"3.8倍",d:"—"},
+ {n:"高校 情報科の代替",v:"796人",d:"臨時免許状236人＋免許外教科担任560人（令和4年5月）"},
+];
+// 岡山県の教員採用倍率
+const teacherOkayama=[
+ {y:"令和7年度",v:4.0,note:"出願1,635人。4年連続減で過去最低を更新"},
+ {y:"令和8年度",v:3.6,note:"採用候補411人。最終倍率は過去最低"},
+ {y:"令和9年度",v:4.3,note:"出願1,663人。採用見込390人。前年比+0.2pt"},
+];
+const teacherOkaByType=[
+ {n:"養護教諭",v:17.5},{n:"栄養教諭",v:19.0},{n:"高等学校",v:6.6},
+ {n:"中学校",v:4.4},{n:"特別支援学校",v:2.6},{n:"小学校",v:2.5},
+];
+
+// ===== 通信制高校（全国・令和7年5月1日／文科省 実態調査） =====
+const tsushin={schools:323, private:227, students:281606, sites:2317,
+ entrants:77998, futoko:44461, subsidy:337200,
+ okaSchools:10, okaStudents:7134, okaDelta:410};
+// 学科別構成比の全国比較
+const deptCompare=[
+ {n:"普通科",oka:60.9,jp:74.1},
+ {n:"専門学科・総合学科等",oka:39.1,jp:25.9},
+];
+
 // ================= 共通 =================
 const ratioColor=r=>r>=1?'rgba(255,107,111,.85)':'rgba(79,157,255,.85)';
-const majors=[...new Set(fine.map(f=>f.major))];
-const mf=document.getElementById('majorFilter');majors.forEach(m=>mf.insertAdjacentHTML('beforeend',`<option>${m}</option>`));
-const skillInd=document.getElementById('skillIndustry');Object.keys(jobtagSupply).forEach(s=>skillInd.insertAdjacentHTML('beforeend',`<option>${s}</option>`));
-const searchBox=document.getElementById('searchBox');
-const searchField=document.getElementById('searchField');
-const searchClear=document.getElementById('searchClear');
 const cAxis={ticks:{color:'#8fa3b5'},grid:{color:'#1e2c39'}};
 const kpiHtml=k=>k.map(x=>`<div class="kpi"><div class="l">${x.l}</div><div class="v">${x.v}</div><div class="d${x.cls?(' '+x.cls):''}">${x.d}</div></div>`).join('');
 
@@ -1608,26 +1981,25 @@ const kpiHtml=k=>k.map(x=>`<div class="kpi"><div class="l">${x.l}</div><div clas
  const valid=fine.filter(f=>f.kyujin>0);
  const top=valid.reduce((a,b)=>b.ratio>a.ratio?b:a);
  const latest=trend[trend.length-1];
- const p2050=popTotal[popTotal.length-1];
+ const p2040=popTotal.find(p=>p.y===2040);
  const stats=[
   {l:"総人口（2025 国調速報）",v:(census2025/10000).toFixed(1)+' 万人'},
-  {l:"2050年 総人口（推計）",v:(p2050.tot/10).toFixed(1)+' 万人'},
+  {l:"2040年 総人口（推計）",v:(p2040.tot/10).toFixed(1)+' 万人'},
   {l:"転出超過（2025年）",v:'5,594 人'},
   {l:"有効求人倍率（2026/6）",v:latest.ok.toFixed(2)+' 倍'},
   {l:"大学等進学率（2025）",v:'57.8 %'},
   {l:"2040年 定員充足率",v:'65.8 %'},
  ];
  document.getElementById('sideStats').innerHTML=stats.map(s=>`<div class="sidebar-stat"><span>${s.l}</span><b>${s.v}</b></div>`).join('');
- document.getElementById('insightBox').innerHTML=`💡 <b>岡山県の構造：</b>人口は2050年に <b>151万人</b>（2020年比 -20%）、生産年齢人口は <b>-27.7%</b>。流出は <b>20〜24歳に集中</b>（2025年の転出超過2,471人＝全体の約59%）。一方で有効求人倍率は <b>${latest.ok.toFixed(2)}倍</b>、「${top.name}」は <b>${top.ratio}倍</b> と現場は逼迫。大学は2040年に定員充足率 <b>65.8%</b>（文科省推計）へ。<b>「人が足りないのに、若者が出ていく」</b>——このギャップを埋めることがOLIVEの中心課題です。`;
 })();
 
 // ========== ① 将来人口推計 ==========
 (function(){
- const p20=popTotal[0],p40=popTotal.find(p=>p.y===2040),p50=popTotal[popTotal.length-1];
+ const p20=popTotal[0],p25=popTotal[1],p40=popTotal.find(p=>p.y===2040),p50=popTotal[popTotal.length-1];
  const k=[
   {l:"総人口（2025年 国勢調査速報）",v:(census2025/10000).toFixed(1)+"万人",d:"社人研推計を約2.3万人下回る",cls:'up'},
-  {l:"2050年 総人口（社人研推計）",v:(p50.tot/10).toFixed(1)+"万人",d:((p50.tot/p20.tot-1)*100).toFixed(1)+"%（2020年比）",cls:'up'},
-  {l:"2040年 生産年齢人口（15-64歳）",v:(p40.c1564/10).toFixed(1)+"万人",d:((p40.c1564/p20.c1564-1)*100).toFixed(1)+"%（2020年比）",cls:'up'},
+  {l:"2040年 総人口（社人研推計）",v:(p40.tot/10).toFixed(1)+"万人",d:((p40.tot/p20.tot-1)*100).toFixed(1)+"%（2020年比）／"+((p40.tot/p25.tot-1)*100).toFixed(1)+"%（2025年比）",cls:'up'},
+  {l:"2040年 生産年齢人口（15-64歳）",v:(p40.c1564/10).toFixed(1)+"万人",d:((p40.c1564/p25.c1564-1)*100).toFixed(1)+"%（2025年比）＝申請書「約15%減」",cls:'up'},
   {l:"転出超過数（2025年）",v:"5,594人",d:"日本人分は4,168人・13年連続",cls:'up'},
   {l:"自然増減（2024年）",v:"-14,647人",d:"出生10,926／死亡25,573",cls:'up'},
  ];
@@ -1642,7 +2014,11 @@ const kpiHtml=k=>k.map(x=>`<div class="kpi"><div class="l">${x.l}</div><div clas
   options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#8fa3b5',font:{size:11}}},tooltip:{callbacks:{label:c=>c.dataset.label+'：'+c.raw.toLocaleString()+'千人',footer:it=>'合計 '+it.reduce((a,b)=>a+b.raw,0).toLocaleString()+'千人'}}},
    scales:{x:{stacked:true,ticks:{color:'#eef3f8'},grid:{display:false}},y:{stacked:true,...cAxis,title:{display:true,text:'人口（千人）',color:'#8fa3b5'}}}}});
 
- new Chart(document.getElementById('popIndex'),{type:'line',
+ const mark2040={id:'mark2040',afterDraw(ch){const xs=ch.scales.x,ys=ch.scales.y;const i=popTotal.findIndex(p=>p.y===2040);if(i<0)return;
+   const x=xs.getPixelForValue(i);const c=ch.ctx;c.save();c.strokeStyle='rgba(255,176,32,.75)';c.lineWidth=1.5;c.setLineDash([5,4]);
+   c.beginPath();c.moveTo(x,ys.top);c.lineTo(x,ys.bottom);c.stroke();c.setLineDash([]);
+   c.fillStyle='rgba(255,176,32,.95)';c.font='bold 11px sans-serif';c.textAlign='center';c.fillText('2040',x,ys.top-4);c.restore();}};
+ new Chart(document.getElementById('popIndex'),{type:'line',plugins:[mark2040],
   data:{labels:popTotal.map(p=>p.y),datasets:[
    {label:'総人口',data:popTotal.map(p=>p.tot/p20.tot*100),borderColor:'#eef3f8',backgroundColor:'transparent',tension:.3,pointRadius:3,borderWidth:2},
    {label:'0〜14歳',data:popTotal.map(p=>p.c014/p20.c014*100),borderColor:'#33c88b',backgroundColor:'transparent',tension:.3,pointRadius:3},
@@ -1738,22 +2114,57 @@ const kpiHtml=k=>k.map(x=>`<div class="kpi"><div class="l">${x.l}</div><div clas
 })();
 
 // ========== ③ 業種別ギャップ ==========
+// 需給ギャップ（人数）＝ 有効求人数 − 有効求職者数
+(function(){
+ const v=fine.filter(f=>f.name!=='分類不能の職業'&&(f.kyujin>0||f.kyushoku>0))
+   .map(f=>({...f,gap:f.kyujin-f.kyushoku}));
+ const sur=v.filter(x=>x.gap<0), sh=v.filter(x=>x.gap>0);
+ const surSum=sur.reduce((a,b)=>a+b.gap,0), shSum=sh.reduce((a,b)=>a+b.gap,0);
+ const worst=v.slice().sort((a,b)=>a.gap-b.gap)[0];
+ const top=v.slice().sort((a,b)=>b.gap-a.gap)[0];
+ document.getElementById('gapKpis').innerHTML=kpiHtml([
+  {l:"求職超過（余剰）の合計",v:Math.abs(surSum).toLocaleString()+"人",d:sur.length+"職種",cls:'down'},
+  {l:"求人超過（不足）の合計",v:shSum.toLocaleString()+"人",d:sh.length+"職種",cls:'up'},
+  {l:"最大の余剰職種",v:worst.name.length>9?worst.name.slice(0,9)+'…':worst.name,d:worst.gap.toLocaleString()+"人（倍率"+worst.ratio+"）",cls:'down'},
+  {l:"最大の不足職種",v:top.name.length>9?top.name.slice(0,9)+'…':top.name,d:"+"+top.gap.toLocaleString()+"人（倍率"+top.ratio+"）",cls:'up'},
+  {l:"2040年 推計（確定値）",v:"5.6万 / 5.5万",d:"事務職等の余剰／高度人材の不足",cls:'up'},
+ ]);
+
+ const d=v.slice().sort((a,b)=>b.gap-a.gap);
+ new Chart(document.getElementById('gapBar'),{type:'bar',
+  data:{labels:d.map(x=>x.name),datasets:[{label:'需給ギャップ（人）',data:d.map(x=>x.gap),
+   backgroundColor:d.map(x=>x.gap>=0?'rgba(255,107,111,.85)':'rgba(79,157,255,.85)')}]},
+  options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+   plugins:{legend:{display:false},tooltip:{callbacks:{
+    label:c=>(c.raw>=0?'不足 +':'余剰 ')+c.raw.toLocaleString()+'人',
+    afterLabel:c=>'倍率 '+d[c.dataIndex].ratio+'／求人 '+d[c.dataIndex].kyujin.toLocaleString()+'・求職 '+d[c.dataIndex].kyushoku.toLocaleString()}}},
+   scales:{x:{...cAxis,title:{display:true,text:'需給ギャップ（人）　＋＝人手不足／−＝求職超過',color:'#8fa3b5'}},
+    y:{ticks:{color:'#eef3f8',font:{size:10}},grid:{display:false}}}}});
+
+ new Chart(document.getElementById('gapScatter'),{type:'bubble',
+  data:{datasets:[
+   {label:'人手不足（求人超過）',data:sh.map(x=>({x:x.ratio,y:x.gap,r:Math.max(4,Math.sqrt(x.kyujin)/4),n:x.name,kj:x.kyujin,ks:x.kyushoku})),backgroundColor:'rgba(255,107,111,.55)'},
+   {label:'求職超過（余剰）',data:sur.map(x=>({x:x.ratio,y:x.gap,r:Math.max(4,Math.sqrt(x.kyushoku)/4),n:x.name,kj:x.kyujin,ks:x.kyushoku})),backgroundColor:'rgba(79,157,255,.55)'},
+  ]},
+  options:{responsive:true,maintainAspectRatio:false,
+   plugins:{legend:{labels:{color:'#8fa3b5',font:{size:11}}},tooltip:{callbacks:{
+    label:c=>c.raw.n,
+    afterLabel:c=>'倍率 '+c.raw.x+'／ギャップ '+(c.raw.y>=0?'+':'')+c.raw.y.toLocaleString()+'人（求人'+c.raw.kj.toLocaleString()+'・求職'+c.raw.ks.toLocaleString()+'）'}}},
+   scales:{x:{type:'logarithmic',...cAxis,title:{display:true,text:'有効求人倍率（対数軸・1.0が均衡）',color:'#8fa3b5'},
+     ticks:{color:'#8fa3b5',callback:v=>[0.2,0.5,1,2,5,10,20].includes(v)?v:''}},
+    y:{...cAxis,title:{display:true,text:'需給ギャップ（人）',color:'#8fa3b5'}}}}});
+})();
+
 new Chart(document.getElementById('trendChart'),{type:'line',
  data:{labels:trend.map(t=>t.m.slice(2)),datasets:[{label:'有効求人倍率',data:trend.map(t=>t.ok),borderColor:'#3ea6ff',backgroundColor:'rgba(62,166,255,.15)',fill:true,tension:.35,pointRadius:3,pointBackgroundColor:'#3ea6ff'}]},
  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.raw+' 倍'}}},
   scales:{x:{ticks:{color:'#8fa3b5',font:{size:11}},grid:{display:false}},y:{...cAxis,suggestedMin:1.0}}}});
 
 let indChart;
-function renderInd(){const mv=mf.value,sv=document.getElementById('sortSel').value,q=(searchBox.value||'').trim();
- let data=fine.filter(f=>f.name!=="分類不能の職業"&&f.kyujin>0);
- if(mv!=='all')data=data.filter(f=>f.major===mv);
- if(q)data=data.filter(f=>f.name.includes(q)||f.major.includes(q));
- data=data.slice().sort((a,b)=>sv==='desc'?b.ratio-a.ratio:a.ratio-b.ratio);
+function renderInd(){
+ const data=fine.filter(f=>f.name!=="分類不能の職業"&&f.kyujin>0).slice().sort((a,b)=>b.ratio-a.ratio);
  document.getElementById('barCount').textContent=`（${data.length}職種）`;
  const wrap=document.getElementById('indBarWrap');
- const emptyEl=document.getElementById('indEmpty');
- if(data.length===0){wrap.classList.add('hide');emptyEl.classList.remove('hide');return;}
- wrap.classList.remove('hide');emptyEl.classList.add('hide');
  wrap.style.height=(data.length*24+70)+'px';wrap.innerHTML='<canvas id="indBar"></canvas>';
  indChart=new Chart(document.getElementById('indBar'),{type:'bar',data:{labels:data.map(d=>d.name),datasets:[{label:'有効求人倍率',data:data.map(d=>d.ratio),backgroundColor:data.map(d=>ratioColor(d.ratio))}]},
   options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.raw+' 倍（求人'+data[c.dataIndex].kyujin.toLocaleString()+'／求職'+data[c.dataIndex].kyushoku.toLocaleString()+'）'}}},
@@ -1763,10 +2174,6 @@ function renderTop(){const valid=fine.filter(f=>f.name!=="分類不能の職業"
  const row=o=>`<div class="li"><span>${o.name}<span style="color:#8fa3b5;font-size:11px">［${o.major}］</span></span><b style="color:${o.ratio>=1?'#ff6b6f':'#4f9dff'}">${o.ratio}</b></div>`;
  document.getElementById('topShort').innerHTML=short.map(row).join('');document.getElementById('topOver').innerHTML=over.map(row).join('');}
 renderTop();renderInd();
-mf.addEventListener('change',renderInd);
-document.getElementById('sortSel').addEventListener('change',renderInd);
-searchBox.addEventListener('input',()=>{searchField.classList.toggle('has-val',!!searchBox.value);renderInd();});
-searchClear.addEventListener('click',()=>{searchBox.value='';searchField.classList.remove('has-val');renderInd();searchBox.focus();});
 
 (function(){const top=fine.filter(f=>f.kyujin>0).sort((a,b)=>b.ratio-a.ratio).slice(0,8);
  document.getElementById('actCards').innerHTML=top.map(o=>`<div class="icard" data-occ="${o.name}"><div class="name" style="font-size:12px">${o.name}</div><div class="rate" style="color:${o.ratio>=3?'#ff6b6f':'#ffb020'}">${o.ratio}<span style="font-size:12px;color:#8fa3b5">倍</span></div><div style="font-size:11px;color:#8fa3b5">求人${o.kyujin.toLocaleString()}／求職${o.kyushoku.toLocaleString()}</div></div>`).join('');
@@ -1778,14 +2185,152 @@ new Chart(document.getElementById('hwBar'),{type:'bar',data:{labels:hw.map(h=>h.
  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.raw+' 倍'+(hw[c.dataIndex].conf?'（検算一致）':'（要確認）')}}},scales:{x:{ticks:{color:'#eef3f8'}},y:{...cAxis,suggestedMin:0.6,suggestedMax:1.6}}}});
 
 // ========== ④ スキルギャップ ==========
-let skillChart;
-function renderSkill(cat){const d=jobtagSupply[cat];if(skillChart)skillChart.destroy();
- document.getElementById('skillOcc').textContent='代表職業：'+d.occ+'（出典：job tag 日本版O-NET／JILPT・厚労省。値は0-100正規化）';
- skillChart=new Chart(document.getElementById('skillBar'),{type:'bar',
-  data:{labels:d.skills.map(s=>s[0]),datasets:[{label:'スキル供給レベル(0-100)',data:d.skills.map(s=>s[1]),backgroundColor:'rgba(79,157,255,.8)'}]},
-  options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'供給レベル '+c.raw+'（需要はアンケートで取得後に重ね合わせ）'}}},
-   scales:{x:{min:0,max:100,...cAxis,title:{display:true,text:'スキル供給レベル（0-100）',color:'#8fa3b5'}},y:{ticks:{color:'#eef3f8',font:{size:11}}}}}});}
-renderSkill("介護・福祉");skillInd.value="介護・福祉";skillInd.addEventListener('change',e=>renderSkill(e.target.value));
+(function(){
+ // 業種 → ③の関連職種（有効求人倍率・求人数を紐づける）
+ const LINK={
+  "介護・福祉":"介護サービス職業従事者",
+  "医療・看護":"保健師，助産師，看護師",
+  "情報通信":"情報処理・通信技術者",
+  "建設・土木":"建設従事者（建設躯体工事従事者を除く）",
+  "製造・生産工程":"製品製造・加工処理従事者（金属製品を除く）",
+  "事務":"一般事務従事者",
+ };
+ const COLOR={"介護・福祉":"#ff6b6f","医療・看護":"#ffb020","情報通信":"#3ea6ff",
+   "建設・土木":"#b48cff","製造・生産工程":"#33c88b","事務":"#8fa3b5"};
+
+ const inds=Object.keys(jobtagSupply);
+ const rows=inds.map(k=>{
+  const d=jobtagSupply[k];
+  const avg=d.skills.reduce((a,b)=>a+b[1],0)/d.skills.length;
+  const occ=fine.find(f=>f.name===LINK[k]);
+  return {k, occ:d.occ, skills:d.skills, avg,
+    ratio:occ?occ.ratio:null, kyujin:occ?occ.kyujin:0, linked:LINK[k]};
+ });
+ const avgAll=rows.reduce((a,b)=>a+b.avg,0)/rows.length;
+
+ // スキルの出現業種数（共通/固有の判定）
+ const cnt={}; inds.forEach(k=>jobtagSupply[k].skills.forEach(s=>cnt[s[0]]=(cnt[s[0]]||0)+1));
+ const allSkills=Object.keys(cnt).sort((a,b)=>cnt[b]-cnt[a]||a.localeCompare(b,'ja'));
+ const common=allSkills.filter(s=>cnt[s]===inds.length);
+
+ // --- KPI ---
+ const hi=rows.slice().sort((a,b)=>b.avg-a.avg)[0], lo=rows.slice().sort((a,b)=>a.avg-b.avg)[0];
+ const short=rows.filter(r=>r.ratio>=1), sur=rows.filter(r=>r.ratio<1);
+ document.getElementById('skillKpis').innerHTML=kpiHtml([
+  {l:"収録スキル項目",v:allSkills.length+"項目",d:"6業種の上位8スキルの和集合"},
+  {l:"全業種に共通するスキル",v:common.length+"項目",d:common.join('・')},
+  {l:"最も高い水準を求める業種",v:hi.k,d:"平均 "+hi.avg.toFixed(1)+"（倍率"+hi.ratio+"）"},
+  {l:"最も低い水準の業種",v:lo.k,d:"平均 "+lo.avg.toFixed(1)+"（倍率"+lo.ratio+"）"},
+  {l:"人手不足の業種",v:short.length+"／"+rows.length+"業種",d:"倍率1.0以上",cls:'up'},
+ ]);
+
+ // --- 4象限マップ ---
+ const quadLines={id:'quadLines',beforeDatasetsDraw(ch){
+   const xs=ch.scales.x, ys=ch.scales.y, c=ch.ctx;
+   const xm=xs.getPixelForValue(avgAll), ym=ys.getPixelForValue(1.0);
+   c.save();
+   // 象限の淡い塗り分け
+   c.fillStyle='rgba(255,107,111,.045)'; c.fillRect(xm,ys.top,xs.right-xm,ym-ys.top);      // 右上
+   c.fillStyle='rgba(255,176,32,.045)';  c.fillRect(xs.left,ys.top,xm-xs.left,ym-ys.top);  // 左上
+   c.fillStyle='rgba(62,166,255,.045)';  c.fillRect(xm,ym,xs.right-xm,ys.bottom-ym);       // 右下
+   c.fillStyle='rgba(143,163,181,.05)';  c.fillRect(xs.left,ym,xm-xs.left,ys.bottom-ym);   // 左下
+   c.strokeStyle='rgba(143,163,181,.5)'; c.lineWidth=1; c.setLineDash([5,4]);
+   c.beginPath(); c.moveTo(xm,ys.top); c.lineTo(xm,ys.bottom); c.stroke();
+   c.beginPath(); c.moveTo(xs.left,ym); c.lineTo(xs.right,ym); c.stroke();
+   c.setLineDash([]);
+   c.font='bold 10.5px sans-serif'; c.textAlign='left';
+   c.fillStyle='rgba(255,107,111,.85)'; c.fillText('高スキル要求 × 人手不足 → 育成に時間。定員・カリキュラム（⑦）', xm+8, ys.top+16);
+   c.fillStyle='rgba(255,176,32,.85)';  c.fillText('低スキル要求 × 人手不足 → 条件・賃金の問題（③）', xs.left+8, ys.top+16);
+   c.fillStyle='rgba(62,166,255,.85)';  c.fillText('高スキル要求 × 求職超過 → 供給はある。需要創出（⑤）', xm+8, ys.bottom-10);
+   c.fillStyle='rgba(143,163,181,.8)';  c.fillText('低スキル要求 × 求職超過 → リスキリングで移動（指標⑤）', xs.left+8, ys.bottom-10);
+   c.restore();
+ }};
+ new Chart(document.getElementById('skillQuad'),{type:'bubble',plugins:[quadLines],
+  data:{datasets:rows.map(r=>({label:r.k,
+    data:[{x:r.avg,y:r.ratio,r:Math.max(9,Math.sqrt(r.kyujin)/2.2),n:r.k,occ:r.occ,kj:r.kyujin,lk:r.linked}],
+    backgroundColor:COLOR[r.k]+'cc',borderColor:COLOR[r.k],borderWidth:2}))},
+  options:{responsive:true,maintainAspectRatio:false,
+   plugins:{legend:{labels:{color:'#8fa3b5',font:{size:11},usePointStyle:true}},
+    tooltip:{callbacks:{label:c=>c.raw.n,
+     afterLabel:c=>'代表職業：'+c.raw.occ+'\n平均スキル '+c.raw.x.toFixed(1)+'／有効求人倍率 '+c.raw.y+'\n関連職種：'+c.raw.lk+'（求人'+c.raw.kj.toLocaleString()+'人）'}}},
+   scales:{x:{...cAxis,min:40,max:92,title:{display:true,text:'求められるスキルの平均レベル（0-100）　→ 右ほど高度',color:'#8fa3b5'}},
+    y:{type:'logarithmic',...cAxis,min:0.2,max:6,
+      title:{display:true,text:'関連職種の有効求人倍率（対数）　↑ 上ほど人手不足',color:'#8fa3b5'},
+      ticks:{color:'#8fa3b5',callback:v=>[0.2,0.3,0.5,1,2,3,5].includes(v)?v:''}}}}});
+
+ const q1=rows.filter(r=>r.avg>=avgAll&&r.ratio>=1).map(r=>r.k);
+ const q2=rows.filter(r=>r.avg<avgAll&&r.ratio>=1).map(r=>r.k);
+ const q3=rows.filter(r=>r.avg>=avgAll&&r.ratio<1).map(r=>r.k);
+ const q4=rows.filter(r=>r.avg<avgAll&&r.ratio<1).map(r=>r.k);
+ document.getElementById('skillQuadInsight').innerHTML=
+  `💡 <b>同じ「人手不足」でも中身が違います。</b>`+
+  `<b style="color:#ff6b6f">${q1.join('・')}</b>は高いスキル水準を求めながら不足しており、育成に年単位の時間がかかります（⑦の定員・カリキュラムの問題）。`+
+  `一方 <b style="color:#ffb020">${q2.join('・')}</b> はスキルの壁が相対的に低いのに不足しています。`+
+  `<b>スキルが理由でないなら、残るのは賃金と労働条件です</b>——③で見たとおり医療・福祉の賃金は全国平均を24.9千円下回り、⑥では中小企業の3年以内離職率が50%を超えます。`+
+  `<b style="color:#3ea6ff">${q3.join('・')}</b>は最も高い水準（平均${hi.avg.toFixed(1)}）を求めるにもかかわらず倍率0.76と求職超過で、<b>供給は足りている</b>。県内に需要そのものを作る側（⑤）の課題です。`+
+  `そして <b style="color:#8fa3b5">${q4.join('・')}</b> が、2040年に5.6万人の余剰が見込まれる層の本体にあたります。`+
+  `<b>この4象限は、そのままOLIVEの打ち手の出し分けに対応します。</b>`;
+
+ // --- ヒートマップ ---
+ let maxv=0; inds.forEach(k=>jobtagSupply[k].skills.forEach(s=>maxv=Math.max(maxv,s[1])));
+ let h='<table class="heat" style="min-width:760px"><thead><tr><th style="background:var(--panel);min-width:190px">スキル＼業種</th>'+
+   inds.map(k=>`<th style="background:var(--panel);font-size:10.5px;white-space:nowrap">${k}</th>`).join('')+
+   '<th style="background:var(--panel)">該当<br>業種数</th></tr></thead><tbody>';
+ allSkills.forEach(sk=>{
+  const isCommon=cnt[sk]===inds.length;
+  h+=`<tr><td style="text-align:left;background:var(--panel2);color:#eef3f8;border:1px solid var(--bg);font-size:11px;white-space:nowrap">`+
+     `${isCommon?'<span style="color:var(--ok)">●</span> ':'<span style="color:var(--muted2)">　</span>'}${sk}</td>`;
+  inds.forEach(k=>{
+   const f=jobtagSupply[k].skills.find(s=>s[0]===sk);
+   if(!f){ h+=`<td style="background:rgba(143,163,181,.07);color:var(--muted2)">－</td>`; }
+   else { const al=0.14+0.82*(f[1]/maxv);
+     h+=`<td style="background:rgba(51,200,139,${al.toFixed(2)})" title="${k}／${sk}：${f[1]}">${f[1]}</td>`; }
+  });
+  h+=`<td style="background:var(--panel2);color:#eef3f8;font-weight:700">${cnt[sk]}</td></tr>`;
+ });
+ document.getElementById('skillHeat').innerHTML=h+'</tbody></table>';
+
+ // --- 共通スキルのレーダー ---
+ new Chart(document.getElementById('skillRadar'),{type:'radar',
+  data:{labels:common,datasets:rows.map(r=>({label:r.k,
+    data:common.map(s=>{const f=r.skills.find(x=>x[0]===s);return f?f[1]:null;}),
+    borderColor:COLOR[r.k],backgroundColor:COLOR[r.k]+'22',borderWidth:2,
+    pointBackgroundColor:COLOR[r.k],pointRadius:3}))},
+  options:{responsive:true,maintainAspectRatio:false,
+   plugins:{legend:{labels:{color:'#8fa3b5',font:{size:10.5},usePointStyle:true}},
+    tooltip:{callbacks:{label:c=>c.dataset.label+'：'+c.raw}}},
+   scales:{r:{min:0,max:100,
+     grid:{color:'rgba(40,57,74,.9)'},angleLines:{color:'rgba(40,57,74,.9)'},
+     pointLabels:{color:'#eef3f8',font:{size:11}},
+     ticks:{color:'#6c8296',backdropColor:'transparent',stepSize:25,font:{size:9}}}}}});
+
+ // --- プロファイル表 ---
+ document.querySelector('#skillProfTable tbody').innerHTML=rows.slice().sort((a,b)=>b.avg-a.avg).map(r=>{
+  const uniq=r.skills.filter(s=>cnt[s[0]]===1).map(s=>s[0]);
+  const sig=r.ratio>=2?'<span class="badge b-short">強い不足</span>':r.ratio>=1?'<span class="badge b-warn">不足</span>':'<span class="badge b-over">求職超過</span>';
+  return `<tr><td style="font-size:11.5px"><b style="color:${COLOR[r.k]}">${r.k}</b><br><span style="color:var(--muted);font-size:10.5px">${r.occ}</span></td>`+
+   `<td style="font-weight:700">${r.avg.toFixed(1)}</td>`+
+   `<td>${r.ratio}<br>${sig}</td>`+
+   `<td style="text-align:left;font-size:11px">${uniq.length?uniq.map(u=>`<span class="tag tag-est" style="margin:1px 2px">${u}</span>`).join(''):'<span style="color:var(--muted2)">なし（すべて他業種と共通）</span>'}</td></tr>`;
+ }).join('');
+
+ // --- 詳細（既存の単一業種バー） ---
+ const skillInd=document.getElementById('skillIndustry');
+ inds.forEach(s=>skillInd.insertAdjacentHTML('beforeend',`<option>${s}</option>`));
+ let skillChart;
+ function renderSkill(cat){const d=jobtagSupply[cat];if(skillChart)skillChart.destroy();
+  document.getElementById('skillOcc').textContent='代表職業：'+d.occ+'（出典：job tag 日本版O-NET／JILPT・厚労省。値は0-100正規化）';
+  skillChart=new Chart(document.getElementById('skillBar'),{type:'bar',
+   data:{labels:d.skills.map(s=>s[0]),datasets:[{label:'スキル供給レベル(0-100)',data:d.skills.map(s=>s[1]),
+    backgroundColor:d.skills.map(s=>cnt[s[0]]===1?'rgba(168,120,255,.85)':'rgba(79,157,255,.8)')}]},
+   options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:false},title:{display:true,text:'紫＝この業種に固有のスキル',color:'#8fa3b5',font:{size:11}},
+     tooltip:{callbacks:{label:c=>'レベル '+c.raw+(cnt[d.skills[c.dataIndex][0]]===1?'（この業種に固有）':'（'+cnt[d.skills[c.dataIndex][0]]+'業種で共通）')}}},
+    scales:{x:{min:0,max:100,...cAxis,title:{display:true,text:'スキルレベル（0-100）',color:'#8fa3b5'}},
+     y:{ticks:{color:'#eef3f8',font:{size:11}}}}}});}
+ renderSkill("介護・福祉");skillInd.value="介護・福祉";
+ skillInd.addEventListener('change',e=>renderSkill(e.target.value));
+})();
 
 // ========== ⑤ 戦略17分野 企業マップ ==========
 const fieldOrder=strategy17.map(s=>s.field);
@@ -1862,6 +2407,81 @@ const relOf={};strategy17.forEach(s=>relOf[s.field]=s.rel);
 })();
 
 // ========== ⑥ 大学別 県内就職状況 ==========
+// タレントフロー（ビジョン文書 表53：Capture Rate／Leakage Rate／Pipeline Bandwidth）
+(function(){
+ // --- 確定値（ファクトブック 表14／様式2-1） ---
+ const U_KANTO=0.109, U_KINKI=0.225, U_OTHER_UNKNOWN=true;   // Uターン就職率
+ const RET_OUTPREF=0.174;                                    // 県外出身者の県内就職率
+ const RET_ALL=0.408;                                        // 大卒者全体の県内就職率
+ // --- 進学先内訳（令和7年度・学校基本調査／旺文社集計） ---
+ const f=eduFlow[eduFlow.length-1];                          // 2025: inP 4017 / outP 5743
+ const total=f.inP+f.outP;
+ const dest={}; destRegion.forEach(d=>dest[d.r]=d.v);
+ const kanto=dest['東京圏'], kinki=dest['関西圏'], chushi=dest['中国四国(岡山除く)'];
+ const otherDest=f.outP-kanto-kinki-chushi;
+ const uKanto=Math.round(kanto*U_KANTO), uKinki=Math.round(kinki*U_KINKI);
+ const uKnown=uKanto+uKinki;
+ const unknownPool=chushi+otherDest;
+ // --- 県外出身者（令和7年度） ---
+ const ui=uniIntake[uniIntake.length-1];                     // 2025: tot 9013 / inb 4017 / outb 4996
+ const stayOut=Math.round(ui.outb*RET_OUTPREF), leakOut=ui.outb-stayOut;
+
+ document.getElementById('flowKpis').innerHTML=kpiHtml([
+  {l:"県外の大学へ進学（流出）",v:f.outP.toLocaleString()+"人",d:"県内高校出身の進学者の"+(f.outP/total*100).toFixed(1)+"%",cls:'up'},
+  {l:"Uターン就職（判明分）",v:uKnown.toLocaleString()+"人",d:"関東"+uKanto+"＋近畿"+uKinki+"。他地域は率が未測定",cls:'up'},
+  {l:"県外出身で県内大学へ",v:ui.outb.toLocaleString()+"人",d:"県内大学入学者の"+(ui.outb/ui.tot*100).toFixed(1)+"%"},
+  {l:"うち県内に就職（定着）",v:stayOut.toLocaleString()+"人",d:"県内就職率 "+(RET_OUTPREF*100).toFixed(1)+"%",cls:'down'},
+  {l:"大卒者全体の県内就職率",v:(RET_ALL*100).toFixed(1)+"%",d:"指標④：R10に+5pt＝45.8%へ"},
+ ]);
+
+ const seg=(w,color,label,sub,cls)=>`<div class="flowseg ${cls||''}" style="flex:${w};background:${color}"><span>${label}</span>${sub?`<small>${sub}</small>`:''}</div>`;
+ const bar=(html)=>`<div class="flowrow">${html}</div>`;
+ const cap=(l,r)=>`<div class="flowlabel"><span>${l}</span><span>${r}</span></div>`;
+
+ // ルート①
+ let a = cap(`<b>大学進学者 ${total.toLocaleString()}人</b>（令和7年度・県内高校出身）`,'');
+ a += bar(
+   seg(f.inP,'rgba(51,200,139,.85)',`県内の大学 ${f.inP.toLocaleString()}人`,(f.inP/total*100).toFixed(1)+'%')+
+   seg(f.outP,'rgba(255,107,111,.78)',`県外の大学へ流出 ${f.outP.toLocaleString()}人`,(f.outP/total*100).toFixed(1)+'%'));
+ a += cap('↓ 県外進学者 '+f.outP.toLocaleString()+'人の進学先と、そこからのUターン就職率','');
+ a += bar(
+   seg(kinki,'rgba(255,176,32,.85)',`関西圏 ${kinki.toLocaleString()}人`,`Uターン ${(U_KINKI*100).toFixed(1)}% → ${uKinki}人`)+
+   seg(chushi,'',`中国四国 ${chushi.toLocaleString()}人`,'Uターン率 未測定','unk')+
+   seg(kanto,'rgba(255,107,111,.85)',`東京圏 ${kanto.toLocaleString()}人`,`Uターン ${(U_KANTO*100).toFixed(1)}% → ${uKanto}人`)+
+   seg(otherDest,'',`その他 ${otherDest.toLocaleString()}人`,'未測定','unk'));
+ a += `<div class="flowlabel"><span>判明しているUターン就職者：<b style="color:var(--ok)">${uKnown}人</b>（県外進学者の${(uKnown/f.outP*100).toFixed(1)}%）</span><span style="color:var(--muted)">残り ${unknownPool.toLocaleString()}人分はUターン率が未測定</span></div>`;
+ document.getElementById('flowA').innerHTML=a;
+
+ // ルート②
+ let b = cap(`<b>県外出身の県内大学入学者 ${ui.outb.toLocaleString()}人</b>（令和7年度）`,'');
+ b += bar(
+   seg(stayOut,'rgba(51,200,139,.85)',`県内に就職 ${stayOut.toLocaleString()}人`,(RET_OUTPREF*100).toFixed(1)+'%')+
+   seg(leakOut,'rgba(255,107,111,.78)',`県外へ ${leakOut.toLocaleString()}人`,(100-RET_OUTPREF*100).toFixed(1)+'%（通過）'));
+ document.getElementById('flowB').innerHTML=b;
+
+ // Capture Rate テーブル
+ const rows=[
+  ['県内高校 → 関西圏の大学',kinki,(U_KINKI*100).toFixed(1)+'%',uKinki,kinki-uKinki,'<span class="tag tag-real">実データ</span>'],
+  ['県内高校 → 東京圏の大学',kanto,(U_KANTO*100).toFixed(1)+'%',uKanto,kanto-uKanto,'<span class="tag tag-real">実データ</span>'],
+  ['県内高校 → 中国四国の大学',chushi,'—',null,null,'<span class="tag tag-mock">未測定</span>'],
+  ['県内高校 → その他地域の大学',otherDest,'—',null,null,'<span class="tag tag-mock">未測定</span>'],
+  ['県内高校 → 県内の大学',f.inP,'—',null,null,'<span class="tag tag-mock">未測定</span>'],
+  ['県外出身 → 県内の大学',ui.outb,(RET_OUTPREF*100).toFixed(1)+'%',stayOut,leakOut,'<span class="tag tag-real">実データ</span>'],
+ ];
+ document.querySelector('#captureTable tbody').innerHTML=rows.map(r=>
+  `<tr><td>${r[0]}</td><td>${r[1].toLocaleString()}人</td><td style="font-weight:700;color:${r[2]==='—'?'var(--muted2)':'var(--text)'}">${r[2]}</td>`+
+  `<td style="color:var(--ok);font-weight:700">${r[3]===null?'<span style="color:var(--muted2);font-weight:400">—</span>':r[3].toLocaleString()+'人'}</td>`+
+  `<td style="color:var(--short)">${r[4]===null?'<span style="color:var(--muted2)">—</span>':r[4].toLocaleString()+'人'}</td><td>${r[5]}</td></tr>`
+ ).join('');
+
+ document.getElementById('flowInsight').innerHTML=
+  `💡 <b>読み取れること：</b>県外へ進学した${f.outP.toLocaleString()}人のうち、Uターンが確認できるのは<b>${uKnown}人（${(uKnown/f.outP*100).toFixed(1)}%）</b>にとどまります。`+
+  `一方、県外から岡山の大学へ来た${ui.outb.toLocaleString()}人のうち<b>${stayOut.toLocaleString()}人（${(RET_OUTPREF*100).toFixed(1)}%）</b>が県内に就職しており、`+
+  `<b style="color:var(--ok)">人数では「県外から来た学生を残す」ほうが「出ていった学生を呼び戻す」より大きい</b>ことになります（${stayOut}人 対 ${uKnown}人・いずれも判明分）。`+
+  `ただし率で見れば県外出身者の定着率17.4%も低く、ビジョン文書が序-4-5で「県外から来た学生を通過者にしないために」と題している通り、`+
+  `<b>${leakOut.toLocaleString()}人が岡山で4年間学びながら県外へ出て行っている</b>のが現状です。この層は既に岡山に住み、地域を知っており、施策の接触コストが最も低い集団といえます。`;
+})();
+
 (function(){
  // ===== ダミー推計モデル：学部構成 → 戦略17分野 × 職種 =====
  const FS=["AI半導体","サイバー","情報通信","量子","防衛","航空宇宙","海洋","造船","素材","創薬医療","バイオ","エネGX","核融合","防災","港湾","フードテック","コンテンツ"];
@@ -2011,8 +2631,434 @@ document.querySelector('#uniInOutTable tbody').innerHTML=uni.map(u=>{
  }).join('')+`<tr style="font-weight:700"><td>合計（18大学）</td><td>${capTotal18.toLocaleString()}人</td><td style="color:var(--short)">${proj2040.toLocaleString()}人</td><td colspan="2" style="text-align:left;font-size:11.5px;color:var(--muted)">推定定員割れ 約${shortfall.toLocaleString()}人</td></tr>`;
 })();
 
+
+// ========== A-1〜A-4 の描画 ==========
+(function(){
+ const barOpt=(xTitle,extra)=>({indexAxis:'y',responsive:true,maintainAspectRatio:false,
+   plugins:Object.assign({legend:{display:false}},extra||{}),
+   scales:{x:{...cAxis,title:{display:true,text:xTitle,color:'#8fa3b5'}},
+     y:{ticks:{color:'#eef3f8',font:{size:10.5}},grid:{display:false}}}});
+
+ // --- 賃金：産業別 ---
+ new Chart(document.getElementById('wageIndChart'),{type:'bar',
+  data:{labels:wageIndustry.map(w=>w.n),datasets:[{data:wageIndustry.map(w=>w.v),
+   backgroundColor:wageIndustry.map(w=>w.v>=WAGE_NATION?'rgba(51,200,139,.8)':'rgba(255,107,111,.75)')}]},
+  options:Object.assign(barOpt('所定内給与額（千円／月）'),{plugins:{legend:{display:false},
+   title:{display:true,text:'産業別 賃金（全国・令和7年）　緑＝全国平均340.6千円以上',color:'#8fa3b5',font:{size:11.5}},
+   tooltip:{callbacks:{label:c=>c.raw+'千円',afterLabel:c=>'全国平均比 '+((c.raw/WAGE_NATION-1)*100).toFixed(1)+'%'}}}})});
+
+ // --- 賃金：学歴別（全体 vs 初任給） ---
+ new Chart(document.getElementById('wageEduChart'),{type:'bar',
+  data:{labels:wageEdu.map(w=>w.n),datasets:[
+   {label:'全年齢平均',data:wageEdu.map(w=>w.all),backgroundColor:'rgba(62,166,255,.8)'},
+   {label:'新規学卒者（初任給）',data:wageEdu.map(w=>w.fresh),backgroundColor:'rgba(255,176,32,.85)'},
+  ]},
+  options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+   plugins:{legend:{labels:{color:'#8fa3b5',font:{size:11}}},
+    title:{display:true,text:'学歴別 賃金（全国・令和7年）',color:'#8fa3b5',font:{size:11.5}},
+    tooltip:{callbacks:{label:c=>c.dataset.label+'：'+c.raw+'千円'}}},
+   scales:{x:{...cAxis,title:{display:true,text:'所定内給与額（千円／月）',color:'#8fa3b5'}},
+    y:{ticks:{color:'#eef3f8',font:{size:11}},grid:{display:false}}}}});
+
+ // --- 賃金：企業規模別 ---
+ new Chart(document.getElementById('wageSizeChart'),{type:'bar',
+  data:{labels:wageSize.map(w=>w.n),datasets:[{data:wageSize.map(w=>w.v),backgroundColor:'rgba(168,120,255,.75)'}]},
+  options:Object.assign(barOpt('千円／月'),{plugins:{legend:{display:false},
+   title:{display:true,text:'企業規模別 賃金（全国）',color:'#8fa3b5',font:{size:11.5}},
+   tooltip:{callbacks:{label:c=>c.raw+'千円'}}}})});
+
+ // --- 賃金：雇用形態別 ---
+ new Chart(document.getElementById('wageEmpChart'),{type:'bar',
+  data:{labels:wageEmpType.map(w=>w.n),datasets:[{data:wageEmpType.map(w=>w.v),
+   backgroundColor:['rgba(51,200,139,.8)','rgba(255,107,111,.75)']}]},
+  options:Object.assign(barOpt('千円／月'),{plugins:{legend:{display:false},
+   title:{display:true,text:'雇用形態別 賃金（全国）　格差67.4',color:'#8fa3b5',font:{size:11.5}},
+   tooltip:{callbacks:{label:c=>c.raw+'千円'}}}})});
+
+ const med=wageIndustry.find(w=>w.n==='医療，福祉').v;
+ const low=wageIndustry[wageIndustry.length-1];
+ document.getElementById('wageInsight').innerHTML=
+  `💡 <b>読み取れること：</b>③で最も人手不足だった<b>介護（3.54倍）・看護（2.05倍）を含む「医療，福祉」の賃金は${med}千円</b>で、全国平均340.6千円を<b>${(340.6-med).toFixed(1)}千円下回ります</b>。`+
+  `⑤で見たとおり岡山県の正社員100人以上の企業は創薬・先端医療分野に190社と最多で、雇用のボリュームゾーンです。`+
+  `つまり岡山は<b>「最も人が足りない分野が、最も賃金の低い分野の一つ」</b>という構造を抱えています。`+
+  `さらに企業規模別では小企業305.6千円と大企業385.1千円で<b>79.4千円の差</b>があり、中小企業中心の県内経済にとって不利に働きます。`+
+  `人手不足を「募集の工夫」で解こうとする限り埋まらない理由が、ここにあります。`;
+
+ // --- 高校：進路内訳 ---
+ new Chart(document.getElementById('hsPathChart'),{type:'doughnut',
+  data:{labels:hsPath.map(p=>p.n),datasets:[{data:hsPath.map(p=>p.v),
+   backgroundColor:['rgba(62,166,255,.85)','rgba(168,120,255,.85)','rgba(51,200,139,.85)','rgba(255,176,32,.8)','rgba(255,107,111,.7)','rgba(143,163,181,.6)'],
+   borderColor:'#151f2a',borderWidth:2}]},
+  options:{responsive:true,maintainAspectRatio:false,
+   plugins:{legend:{position:'right',labels:{color:'#8fa3b5',font:{size:10.5},boxWidth:12}},
+    title:{display:true,text:'高校卒業者 15,172人の進路（令和7年3月）',color:'#8fa3b5',font:{size:11.5}},
+    tooltip:{callbacks:{label:c=>c.label+'：'+c.raw.toLocaleString()+'人（'+(c.raw/HS_GRAD*100).toFixed(1)+'%）'}}}}});
+
+ // --- 高校：学科別生徒数 ---
+ new Chart(document.getElementById('hsDeptChart'),{type:'bar',
+  data:{labels:hsDept.map(d=>d.n),datasets:[{data:hsDept.map(d=>d.v),
+   backgroundColor:hsDept.map(d=>d.n==='普通科'?'rgba(143,163,181,.6)':'rgba(51,200,139,.8)')}]},
+  options:Object.assign(barOpt('生徒数（人）'),{plugins:{legend:{display:false},
+   title:{display:true,text:'学科別 生徒数（本科46,700人）　緑＝専門学科等',color:'#8fa3b5',font:{size:11.5}},
+   tooltip:{callbacks:{label:c=>c.raw.toLocaleString()+'人（'+(c.raw/HS_DEPT_TOTAL*100).toFixed(1)+'%）'}}}})});
+
+ // --- 高校：就職の県内/県外 ---
+ new Chart(document.getElementById('hsJobChart'),{type:'bar',
+  data:{labels:hsJobInd.map(x=>x.n),datasets:[
+   {label:'県内就職',data:hsJobInd.map(x=>x.inp),backgroundColor:'rgba(51,200,139,.85)'},
+   {label:'県外就職',data:hsJobInd.map(x=>x.outp),backgroundColor:'rgba(255,107,111,.8)'},
+  ]},
+  options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+   plugins:{legend:{labels:{color:'#8fa3b5',font:{size:11}}},
+    title:{display:true,text:'高校卒業者の就職先（産業別・県内/県外）計2,873人',color:'#8fa3b5',font:{size:11.5}},
+    tooltip:{callbacks:{label:c=>c.dataset.label+'：'+c.raw.toLocaleString()+'人',
+     footer:it=>{const t=it.reduce((a,b)=>a+b.raw,0);return '計 '+t.toLocaleString()+'人（県内率 '+(it[0]?(it[0].raw/t*100).toFixed(1):'—')+'%）';}}}},
+   scales:{x:{stacked:true,...cAxis,title:{display:true,text:'就職者数（人）',color:'#8fa3b5'}},
+    y:{stacked:true,ticks:{color:'#eef3f8',font:{size:11}},grid:{display:false}}}}});
+
+ // --- 専修学校：分野別 ---
+ new Chart(document.getElementById('senshuChart'),{type:'bar',
+  data:{labels:senshu.fields.map(f=>f.n),datasets:[{data:senshu.fields.map(f=>f.v),
+   backgroundColor:senshu.fields.map(f=>f.n==='医療関係'?'rgba(255,107,111,.85)':'rgba(62,166,255,.75)')}]},
+  options:Object.assign(barOpt('生徒数（人）'),{plugins:{legend:{display:false},
+   title:{display:true,text:'専修学校 分野別 生徒数（49校・計8,524人）',color:'#8fa3b5',font:{size:11.5}},
+   tooltip:{callbacks:{label:c=>c.raw.toLocaleString()+'人（'+(c.raw/senshu.students*100).toFixed(1)+'%）'}}}})});
+
+ // --- 離職率：事業所規模別 ---
+ new Chart(document.getElementById('turnoverSizeChart'),{type:'bar',
+  data:{labels:turnoverSize.map(t=>t.n),datasets:[
+   {label:'高卒',data:turnoverSize.map(t=>t.hs),backgroundColor:'rgba(255,176,32,.85)'},
+   {label:'大卒',data:turnoverSize.map(t=>t.uni),backgroundColor:'rgba(62,166,255,.85)'},
+  ]},
+  options:{responsive:true,maintainAspectRatio:false,
+   plugins:{legend:{labels:{color:'#8fa3b5',font:{size:11}}},
+    title:{display:true,text:'事業所規模別 3年以内離職率（全国・令和3年3月卒）',color:'#8fa3b5',font:{size:11.5}},
+    tooltip:{callbacks:{label:c=>c.dataset.label+'：'+c.raw+'%'}}},
+   scales:{x:{ticks:{color:'#eef3f8',font:{size:10}},grid:{display:false}},
+    y:{...cAxis,title:{display:true,text:'3年以内離職率（%）',color:'#8fa3b5'}}}}});
+
+ // --- 離職率：産業別 ---
+ new Chart(document.getElementById('turnoverIndChart'),{type:'bar',
+  data:{labels:turnoverInd.map(t=>t.n),datasets:[
+   {label:'高卒',data:turnoverInd.map(t=>t.hs),backgroundColor:'rgba(255,176,32,.85)'},
+   {label:'大卒',data:turnoverInd.map(t=>t.uni),backgroundColor:'rgba(62,166,255,.85)'},
+  ]},
+  options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+   plugins:{legend:{labels:{color:'#8fa3b5',font:{size:11}}},
+    title:{display:true,text:'離職率の高い産業 上位5（全国・令和3年3月卒）',color:'#8fa3b5',font:{size:11.5}},
+    tooltip:{callbacks:{label:c=>c.dataset.label+'：'+c.raw+'%'}}},
+   scales:{x:{...cAxis,title:{display:true,text:'3年以内離職率（%）',color:'#8fa3b5'}},
+    y:{ticks:{color:'#eef3f8',font:{size:10}},grid:{display:false}}}}});
+
+ document.getElementById('turnoverInsight').innerHTML=
+  `💡 <b>読み取れること：</b>最新（令和4年3月卒）の3年以内離職率は<b>大卒33.8%・高卒37.9%・短大等44.5%</b>。`+
+  `つまり<b>県内に就職させた3人に1人は3年以内に辞めます</b>。指標④（県内就職率を40.8%→45.8%）を達成しても、`+
+  `定着しなければ純増はその2/3にしかなりません。<br>`+
+  `さらに深刻なのは構造です。離職率は<b>事業所規模が小さいほど高く</b>（5人未満で高卒62.5%・大卒59.1%、1,000人以上では27.3%・28.2%）、`+
+  `<b>産業別では医療，福祉が高卒49.3%・大卒41.5%と上位5位に入ります</b>。`+
+  `岡山県は中小企業が中心で、かつ医療・福祉が最大の雇用ボリューム（⑤で190社）です。`+
+  `<b>「地元の中小企業の医療・福祉職に就職させる」という施策は、最も離職率が高い組み合わせ</b>に人を送り込むことを意味します。`+
+  `指標⑤（リスキリング）と指標⑥（賃上げ・生産性向上）が県内就職率の向上とセットで設計されているのは、この構造への対応と読めます。`;
+})();
+
+
+// ========== ◎ 全体サマリー ==========
+(function(){
+ // --- KPI（2段） ---
+ const p20=popTotal[0], p25=popTotal[1], p50=popTotal[popTotal.length-1], p40=popTotal.find(p=>p.y===2040);
+ const a=advRate[advRate.length-1], ef=eduFlow[eduFlow.length-1];
+ const gapv=fine.filter(f=>f.name!=='分類不能の職業'&&f.kyujin>0).map(f=>({...f,g:f.kyujin-f.kyushoku}));
+ const shSum=gapv.filter(x=>x.g>0).reduce((s,x)=>s+x.g,0);
+ const surSum=Math.abs(gapv.filter(x=>x.g<0).reduce((s,x)=>s+x.g,0));
+ const ALLF=firmsDB.concat(firmsBranch);
+ const capTotal=univCapacity.reduce((s,u)=>s+u.cap,0);
+ const latest=trend[trend.length-1];
+
+ document.getElementById('sumKpis1').innerHTML=kpiHtml([
+  {l:"2040年 総人口（推計）",v:(p40.tot/10).toFixed(1)+"万人",d:((p40.tot/p25.tot-1)*100).toFixed(1)+"%（2025年比）",cls:'up'},
+  {l:"2040年 生産年齢人口",v:(p40.c1564/10).toFixed(1)+"万人",d:((p40.c1564/p25.c1564-1)*100).toFixed(1)+"%（2025年比）",cls:'up'},
+  {l:"転出超過（2025年）",v:"5,594人",d:"20〜24歳が2,471人＝59.3%",cls:'up'},
+  {l:"大学等進学率",v:a.ok+"%",d:"全国 "+a.jp+"%（差 "+(a.ok-a.jp).toFixed(1)+"pt）",cls:'down'},
+  {l:"県外の大学へ進学",v:ef.outP.toLocaleString()+"人",d:(ef.outP/(ef.inP+ef.outP)*100).toFixed(1)+"%が県外へ",cls:'up'},
+ ]);
+ document.getElementById('sumKpis2').innerHTML=kpiHtml([
+  {l:"大卒の県内就職率",v:"40.8%",d:"指標④：R10に45.8%へ（+5pt）"},
+  {l:"高卒の県内就職率",v:"80.4%",d:"2,310/2,873人。大卒の約2倍"},
+  {l:"有効求人倍率",v:latest.ok.toFixed(2)+"倍",d:"不足"+shSum.toLocaleString()+"人／余剰"+surSum.toLocaleString()+"人"},
+  {l:"正社員100人以上の企業",v:ALLF.length+"社",d:"従業員 約"+(ALLF.reduce((s,f)=>s+f.e,0)/10000).toFixed(1)+"万人"},
+  {l:"2040年 大学定員充足率",v:(fillRate2040*100).toFixed(1)+"%",d:"定員"+capTotal.toLocaleString()+"人→"+Math.round(capTotal*fillRate2040).toLocaleString()+"人",cls:'up'},
+ ]);
+
+ // --- 構造フロー図 ---
+ const stages=[
+  {t:'① 人が減る',c:'var(--est)',rows:[
+    ['164.6万人','2040年の総人口（2025年比 −10.2%）'],
+    ['−15.2%','2040年の生産年齢人口の減少幅（2025年比）']]},
+  {t:'② 若者が出ていく',c:'var(--short)',rows:[
+    ['2,471人','20〜24歳の転出超過。流出全体の59.3%'],
+    ['5,743人','県外の大学へ進学（高校出身進学者の58.8%）']]},
+  {t:'③ 戻ってこない',c:'var(--warn)',rows:[
+    ['10.9% / 22.5%','関東・近畿へ進学した学生のUターン就職率'],
+    ['17.4%','県外出身で県内大学に来た学生の県内就職率']]},
+  {t:'④ 二重の帰結',c:'var(--accent)',rows:[
+    ['15,333人','企業の人手不足（求人超過）。一方で余剰10,970人'],
+    ['65.8%','2040年の大学入学定員充足率（文科省推計）']]},
+ ];
+ document.getElementById('flowDiagram').innerHTML=stages.map((s,i)=>{
+  const card=`<div class="flowcard" style="border-top:3px solid ${s.c}">`+
+   `<h4 style="color:${s.c}">${s.t}</h4>`+
+   s.rows.map(r=>`<div class="fnum" style="color:${s.c}">${r[0]}</div><div class="fsub">${r[1]}</div>`).join('')+
+   `</div>`;
+  return card + (i<stages.length-1 ? '<div class="flowarrow">▶</div>' : '');
+ }).join('');
+
+ document.getElementById('sumInsight').innerHTML=
+  `💡 <b>この流れが意味すること：</b>岡山県は<b>「人手が足りないのに、若者が出ていく」</b>という一見矛盾した状態にあります。`+
+  `しかし③で見たとおり、最も人手が足りない医療・福祉分野の賃金は全国平均を24.9千円下回り、`+
+  `⑥で見たとおり中小企業の3年以内離職率は大卒で50%を超えます。`+
+  `<b>「足りない」のは人ではなく、人が留まる条件のほうだと読むこともできます。</b>`+
+  `なお本ダッシュボードは<b>2040年をターゲット年</b>として数値を揃えています（社人研の都道府県別推計は2050年まで公表されているため、①では2050年までの推移も併記）。OLIVEの指標④（県内就職率+5pt）は②③の段階に、指標⑤（リスキリング）と指標⑥（賃上げ・生産性向上）は④の段階に効かせる設計になっており、`+
+  `4段階のどこか1か所ではなく流れ全体に手を打つ構成になっています。`;
+
+ // --- 主要パラメータ一覧 ---
+ const P=[
+  ['人口','総人口','183.2万人（2025年推計）','164.6万人（2040年推計・−10.2%）','pop','real'],
+  ['人口','生産年齢人口（15〜64歳）','104.6万人（2025年推計）','88.7万人（2040年推計・−15.2%）','pop','real'],
+  ['人口','高齢化率','31.4%（2025年推計）','35.5%（2040年推計）','pop','real'],
+  ['人口','転出超過数','5,594人（2025年）','—','pop','real'],
+  ['人口','うち20〜24歳の転出超過','2,471人（全体の59.3%）','—','pop','real'],
+  ['人口','自然増減','−14,647人（2024年）','—','pop','real'],
+  ['人口','合計特殊出生率','1.23（2025年・3年連続で過去最低）','—','pop','real'],
+  ['進学','大学等進学率','57.8%（全国62.6%）','—','edu','real'],
+  ['進学','県外の大学へ進学','5,743人（58.8%）','—','edu','real'],
+  ['進学','県内大学の入学者','9,013人（2025年）','6,514人（2040年・文科省推計）','edu','real'],
+  ['進学','高校卒業者','15,172人（2025年3月）','—','edu','real'],
+  ['進学','高卒の県内就職率','80.4%（2,310/2,873人）','2012年 約86%から低下','edu','real'],
+  ['進学','専修学校（専門課程）在籍','8,396人（49校）','—','edu','real'],
+  ['就業','有効求人倍率','1.23倍（2026年6月）','—','ind','real'],
+  ['就業','人手不足（求人超過）','15,333人／38職種','—','ind','real'],
+  ['就業','求職超過（余剰）','10,970人／17職種','—','ind','real'],
+  ['就業','2040年の就業構造','—','事務職等 5.6万人余剰／高度人材 5.5万人不足','ind','real'],
+  ['就業','賃金（全国平均・所定内給与）','340.6千円／月','岡山県は全国平均以下（4都府県のみが上回る）','ind','chk'],
+  ['就業','医療・福祉の賃金','315.7千円（全国平均−24.9千円）','—','ind','chk'],
+  ['産業','正社員100人以上の企業','700社（DB695社＋事業所5件）','—','firm','real'],
+  ['産業','その従業員数の合計','約23.0万人','—','firm','real'],
+  ['産業','該当企業0社の戦略分野','5分野／17分野','—','firm','real'],
+  ['大学','大卒の県内就職率','40.8%','45.8%（指標④・令和10年度目標）','uni','real'],
+  ['大学','Uターン就職率','関東10.9%／近畿22.5%','—','uni','real'],
+  ['大学','県外出身者の県内就職率','17.4%','—','uni','real'],
+  ['大学','3年以内離職率','大卒33.8%／高卒37.9%（全国）','—','uni','chk'],
+  ['大学','4年制大学','18大学・83学部','—','sim','real'],
+  ['大学','入学定員 合計','10,272人','—','sim','real'],
+  ['大学','2040年 入学定員充足率','—','65.8%（文科省 岡山県推計）','sim','real'],
+  ['大学','2040年 推定定員割れ','—','約3,513人（定員の34.2%）','sim','est'],
+ ];
+ const tagOf=k=>k==='real'?'<span class="tag tag-real">実データ</span>':k==='chk'?'<span class="tag tag-chk">実データ・要確認</span>':'<span class="tag tag-est">推計</span>';
+ const catSel=document.getElementById('sumCatSel');
+ [...new Set(P.map(r=>r[0]))].forEach(c=>catSel.insertAdjacentHTML('beforeend',`<option>${c}</option>`));
+ const colorOf={'人口':'var(--est)','進学':'var(--warn)','就業':'var(--short)','産業':'var(--ok)','大学':'var(--accent)'};
+ function renderSum(){
+  const v=catSel.value;
+  const rows=v==='all'?P:P.filter(r=>r[0]===v);
+  document.querySelector('#sumTable tbody').innerHTML=rows.map(r=>
+   `<tr><td style="color:${colorOf[r[0]]};font-weight:700">${r[0]}</td>`+
+   `<td style="text-align:left">${r[1]}</td>`+
+   `<td style="text-align:left;font-size:12px">${r[2]}</td>`+
+   `<td style="text-align:left;font-size:12px;color:${r[3]==='—'?'var(--muted2)':'var(--short)'}">${r[3]}</td>`+
+   `<td style="text-align:center"><span class="jump" data-go="${r[4]}">見る</span></td>`+
+   `<td>${tagOf(r[5])}</td></tr>`).join('');
+  document.querySelectorAll('#sumTable .jump').forEach(b=>b.addEventListener('click',()=>{
+   const t=document.querySelector('.tab[data-tab="'+b.dataset.go+'"]'); if(t) t.click();
+  }));
+ }
+ catSel.addEventListener('change',renderSum); renderSum();
+
+ // --- データ充足状況 ---
+ const dq=[['実データ',P.filter(r=>r[5]==='real').length],['実データ・要確認',P.filter(r=>r[5]==='chk').length],
+           ['推計',P.filter(r=>r[5]==='est').length],['未測定（別表）',11]];
+ new Chart(document.getElementById('dataQualityChart'),{type:'doughnut',
+  data:{labels:dq.map(d=>d[0]),datasets:[{data:dq.map(d=>d[1]),
+   backgroundColor:['rgba(51,200,139,.85)','rgba(62,166,255,.8)','rgba(168,120,255,.8)','rgba(255,176,32,.8)'],
+   borderColor:'#151f2a',borderWidth:2}]},
+  options:{responsive:true,maintainAspectRatio:false,
+   plugins:{legend:{position:'right',labels:{color:'#8fa3b5',font:{size:11},boxWidth:12}},
+    title:{display:true,text:'主要パラメータ'+P.length+'件＋未測定11件の内訳',color:'#8fa3b5',font:{size:11.5}},
+    tooltip:{callbacks:{label:c=>c.label+'：'+c.raw+'件'}}}}});
+
+ // --- KPIミニ表 ---
+ const K=[
+  ['指標④ 県内就職率','40.8%','45.8%（+5pt）','<span class="badge b-warn">現況値あり</span>'],
+  ['指標⑥ 重点分野の求人倍率','建設・土木 6.32倍／医療・福祉 2.05〜3.54倍','各分野15%以上の低減','<span class="badge b-warn">現況値あり</span>'],
+  ['指標② 教育改革の実行率','—','参画校の100%','<span class="badge b-short">未測定</span>'],
+  ['指標③ PBL創出件数','—','年間50件・5,000名','<span class="badge b-short">未測定</span>'],
+  ['指標⑤ リスキリング導入','ハレリカ 57社・125人（R7）','累計250社・1,000名','<span class="badge b-warn">基準値あり</span>'],
+  ['指標⑦ 自走化財源','—','年間3,000万円','<span class="badge b-short">未測定</span>'],
+  ['指標⑲ 3年後定着率（中核）','全国値：大卒33.8%が離職','会員企業データで測定予定','<span class="badge b-short">未測定</span>'],
+ ];
+ document.querySelector('#kpiMiniTable tbody').innerHTML=K.map(r=>
+  `<tr><td style="font-size:11.5px">${r[0]}</td><td style="text-align:left;font-size:11.5px">${r[1]}</td>`+
+  `<td style="text-align:left;font-size:11.5px">${r[2]}</td><td>${r[3]}</td></tr>`).join('');
+
+ // --- 未測定リスト ---
+ const G=[
+  ['②','専修学校の学科別 入学定員','在籍者数のみ取得済み。Tier 1の供給量を正確に積み上げるために必要'],
+  ['②','津山工業高専の学科別定員','総合理工学科4系（先進科学・機械システム・電気電子システム・情報システム）の構成までは確認済み'],
+  ['②','専修学校卒業生の県内就職率','公表確認できず'],
+  ['③','岡山県の職種別・産業別 賃金の実数','e-Statの都道府県別×職種DBに存在。取得すれば「倍率×賃金」の散布図が描ける'],
+  ['③','2040年 就業構造の業種別内訳','5.6万人／5.5万人の総量のみ。ビジョン表37①として岡山経済研究所が分解予定'],
+  ['④','スキルの需要側（企業が求めるレベル）','岡山経済研究所アンケートで取得予定。現在はダミー'],
+  ['⑤','5分野の該当企業','デジタル・量子・航空宇宙・合成生物学バイオ・核融合。正社員100人以上が県内に存在せず'],
+  ['⑥','大学別の県内就職率（6校）','岡山大学・津山工業高専以外は未公表。各校キャリアセンターへの照会が必要'],
+  ['⑥','出身地×就職地のクロス集計','8校すべて未公表。指標⑲として会員企業の匿名化データから取得予定'],
+  ['⑥','岡山県別の3年以内離職率','全国値のみ。都道府県別の公表は確認できず'],
+  ['⑥','大学×分野×職種の県内就職者数','この粒度の公表統計は存在せず。現在は学部定員からの推計モデル'],
+ ];
+ document.querySelector('#gapsTable tbody').innerHTML=G.map(r=>
+  `<tr><td style="text-align:center;font-weight:700;color:var(--accent)">${r[0]}</td>`+
+  `<td style="text-align:left">${r[1]}</td>`+
+  `<td style="text-align:left;font-size:11.5px;color:var(--muted)">${r[2]}</td></tr>`).join('');
+})();
+
+// ヘッダー高を実測してCSS変数へ反映（タブ帯とサイドバーの固定位置を合わせる）
+(function(){
+ const hd=document.querySelector('header'), de=document.documentElement;
+ if(!hd||!de||!de.style) return;
+ const sync=()=>de.style.setProperty('--header-h',(hd.offsetHeight||88)+'px');
+ sync(); window.addEventListener('resize',sync);
+ if(window.ResizeObserver) new ResizeObserver(sync).observe(hd);
+})();
+
 // ========== タブ ==========
-const tabMap={pop:'tab-pop',edu:'tab-edu',ind:'tab-ind',skill:'tab-skill',firm:'tab-firm',uni:'tab-uni',sim:'tab-sim'};
+
+// ========== v1.6 追加分の描画 ==========
+(function(){
+ const barOptY=(t)=>({indexAxis:'y',responsive:true,maintainAspectRatio:false,
+  plugins:{legend:{display:false},title:{display:true,text:t,color:'#8fa3b5',font:{size:11.5}}},
+  scales:{x:{...cAxis},y:{ticks:{color:'#eef3f8',font:{size:11}},grid:{display:false}}}});
+
+ // ---------- (1) 配置／接続 ----------
+ const nAllo=alloConn.filter(r=>r[2].startsWith('配置')).length;
+ const nConn=alloConn.filter(r=>r[2]==='接続').length;
+ new Chart(document.getElementById('allocChart'),{type:'doughnut',
+  data:{labels:['配置の指標','接続の指標'],datasets:[{data:[nAllo,nConn],
+   backgroundColor:['rgba(168,120,255,.85)','rgba(51,200,139,.85)'],borderColor:'#151f2a',borderWidth:2}]},
+  options:{responsive:true,maintainAspectRatio:false,
+   plugins:{legend:{position:'right',labels:{color:'#8fa3b5',font:{size:11},boxWidth:12}},
+    title:{display:true,text:'収録指標'+alloConn.length+'件の内訳',color:'#8fa3b5',font:{size:11.5}},
+    tooltip:{callbacks:{label:c=>c.label+'：'+c.raw+'件'}}}}});
+ document.querySelector('#allocTable tbody').innerHTML=alloConn.map(r=>{
+  const isC=r[2]==='接続';
+  return `<tr><td style="text-align:center;font-weight:700;color:var(--accent)">${r[0]}</td>`+
+   `<td style="text-align:left">${r[1]}</td>`+
+   `<td><span class="tag ${isC?'tag-real':'tag-est'}">${r[2]}</span></td>`+
+   `<td style="text-align:left;font-size:11.5px;color:var(--muted)">${r[3]}</td></tr>`;
+ }).join('');
+
+ // ---------- (2) 配置の限界 ----------
+ const K=kochiTech;
+ new Chart(document.getElementById('kochiChart'),{type:'bar',
+  data:{labels:K.map(k=>k.ph.split('\n')),datasets:[
+   {type:'bar',label:'志願者数（人）',data:K.map(k=>k.apply),backgroundColor:'rgba(62,166,255,.75)',yAxisID:'y',order:2},
+   {type:'line',label:'地域内入学者率(%)',data:K.map(k=>k.inEnt),borderColor:'#ff6b6f',backgroundColor:'transparent',borderWidth:3,pointRadius:5,pointBackgroundColor:'#ff6b6f',yAxisID:'y1',order:1},
+   {type:'line',label:'地域内就職率(%)',data:K.map(k=>k.inJob),borderColor:'#ffb020',backgroundColor:'transparent',borderWidth:3,pointRadius:5,pointBackgroundColor:'#ffb020',yAxisID:'y1',order:1},
+  ]},
+  options:{responsive:true,maintainAspectRatio:false,
+   plugins:{legend:{labels:{color:'#8fa3b5',font:{size:10.5}}},
+    tooltip:{callbacks:{label:c=>c.dataset.label+'：'+c.raw+(c.dataset.yAxisID==='y1'?'%':'人')}}},
+   scales:{x:{ticks:{color:'#eef3f8',font:{size:10}},grid:{display:false}},
+    y:{...cAxis,title:{display:true,text:'志願者数（人）',color:'#8fa3b5'}},
+    y1:{position:'right',min:0,max:60,grid:{display:false},ticks:{color:'#ff6b6f',callback:v=>v+'%'}}}}});
+
+ new Chart(document.getElementById('cocChart'),{type:'bar',
+  data:{labels:cocPlus.map(c=>c.y),datasets:[{data:cocPlus.map(c=>c.v),
+   backgroundColor:['rgba(51,200,139,.8)','rgba(255,176,32,.8)','rgba(255,107,111,.8)']}]},
+  options:{responsive:true,maintainAspectRatio:false,
+   plugins:{legend:{display:false},
+    title:{display:true,text:'採択国立大16校の地域内就職者割合',color:'#8fa3b5',font:{size:11.5}},
+    tooltip:{callbacks:{label:c=>c.raw+'%'}}},
+   scales:{x:{ticks:{color:'#eef3f8',font:{size:10.5}},grid:{display:false}},
+    y:{...cAxis,min:30,max:40,title:{display:true,text:'地域内就職者割合（%）',color:'#8fa3b5'},ticks:{color:'#8fa3b5',callback:v=>v+'%'}}}}});
+
+ const rowsK=[
+  ['志願者数',K[0].apply.toLocaleString()+'人',K[1].apply.toLocaleString()+'人',K[2].apply.toLocaleString()+'人','<span class="badge b-ok">回復</span>'],
+  ['入学定員充足率',K[0].fill+'倍',K[1].fill+'倍',K[2].fill+'倍','<span class="badge b-ok">回復</span>'],
+  ['地域内入学者率',K[0].inEnt+'%',K[1].inEnt+'%',K[2].inEnt+'%','<span class="badge b-short">半減</span>'],
+  ['地域内就職率',K[0].inJob+'%',K[1].inJob+'%',K[2].inJob+'%','<span class="badge b-warn">初年度から低下</span>'],
+  ['自己収入率',K[0].selfRev+'%',K[1].selfRev+'%',K[2].selfRev+'%','<span class="badge b-short">大幅低下</span>'],
+  ['住民一人当たり負担額','—',K[1].burden+'千円',K[2].burden+'千円','<span class="badge b-short">2.5倍</span>'],
+ ];
+ document.querySelector('#kochiTable tbody').innerHTML=rowsK.map(r=>
+  `<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td style="font-weight:700">${r[3]}</td><td>${r[4]}</td></tr>`).join('');
+
+ document.getElementById('alloLimitInsight').innerHTML=
+  `💡 <b>公立化は「席を埋める」ことには成功し、「地域に残す」ことには失敗しました。</b>`+
+  `志願者は767人→5,812人と7.6倍になり、充足率は0.81倍→1.13倍へ即座に回復。しかし<b style="color:#ff6b6f">地域内入学者率は50.5%→26.1%とほぼ半減</b>し、`+
+  `<b style="color:#ffb020">地域内就職率も初年度26.0%から17.8%へ低下</b>、自己収入率は76.9%→39.1%、住民一人当たりの負担は3.7千円→9.4千円と2.5倍になりました。`+
+  `<b>公費負担を大きく増やしながら、入口（地元出身者）は公立化前より悪化している</b>という結果です。<br>`+
+  `COC+も同じ方向を示します。採択された国立大16校の地域内就職者割合は37.2%→34.6%で、検証した研究は「全体でみても、個別大学でみても、地域内就職者割合に大きな変化はみられなかった」と結論しています。`+
+  `<b>⑦の定員割れという数字に対して、定員調整や再編・統合という「配置の道具」で応えようとすると、この2つと同じ結果になる可能性があります。</b>`;
+
+ // ---------- (3) 教員不足 ----------
+ document.getElementById('teacherKpis').innerHTML=kpiHtml(
+  teacherNation.map(t=>({l:t.n,v:t.v,d:t.d,cls:'up'})));
+ new Chart(document.getElementById('teacherOkaChart'),{type:'bar',
+  data:{labels:teacherOkayama.map(t=>t.y),datasets:[{data:teacherOkayama.map(t=>t.v),
+   backgroundColor:teacherOkayama.map(t=>t.v<4?'rgba(255,107,111,.85)':'rgba(255,176,32,.8)')}]},
+  options:{responsive:true,maintainAspectRatio:false,
+   plugins:{legend:{display:false},title:{display:true,text:'岡山県 教員採用試験の倍率',color:'#8fa3b5',font:{size:11.5}},
+    tooltip:{callbacks:{label:c=>c.raw+'倍',afterLabel:c=>teacherOkayama[c.dataIndex].note}}},
+   scales:{x:{ticks:{color:'#eef3f8'},grid:{display:false}},
+    y:{...cAxis,min:0,max:5,title:{display:true,text:'倍率',color:'#8fa3b5'}}}}});
+ new Chart(document.getElementById('teacherTypeChart'),{type:'bar',
+  data:{labels:teacherOkaByType.map(t=>t.n),datasets:[{data:teacherOkaByType.map(t=>t.v),
+   backgroundColor:teacherOkaByType.map(t=>t.v<3?'rgba(255,107,111,.85)':t.v<5?'rgba(255,176,32,.8)':'rgba(51,200,139,.75)')}]},
+  options:Object.assign(barOptY('岡山県 校種別 倍率（令和7年度）　赤＝3倍未満'),
+   {plugins:{legend:{display:false},title:{display:true,text:'岡山県 校種別 倍率（令和7年度）　赤＝3倍未満',color:'#8fa3b5',font:{size:11.5}},
+    tooltip:{callbacks:{label:c=>c.raw+'倍'}}}})});
+ document.getElementById('teacherInsight').innerHTML=
+  `💡 <b>「教える人」がすでに制約になっています。</b>全国の教員不足は3,827人で令和3年度の2,065人から<b>約1.9倍</b>、採用倍率は2.9倍と<b>過去最低</b>です。`+
+  `岡山県も令和8年度の最終倍率は<b>3.6倍で過去最低</b>を更新しました（令和7年度は4.0倍で4年連続減）。`+
+  `校種別に見ると<b style="color:#ff6b6f">小学校2.5倍・特別支援学校2.6倍</b>と、採用の質を保てる水準を割り込みつつあります。`+
+  `一方で養護教諭17.5倍・栄養教諭19.0倍と、職種によって10倍近い開きがあります。<br>`+
+  `高校の情報科では全国で臨時免許状236人＋免許外教科担任560人＝<b>796人が正規の免許なしで教えている</b>状態です。`+
+  `③で見たとおり情報通信は最も高いスキル水準を求める分野ですが、<b>それを教える人の供給が細っている</b>という構造があります。`;
+
+ // ---------- (4) 通信制・学科比較 ----------
+ document.getElementById('tsushinKpis').innerHTML=kpiHtml([
+  {l:"通信制高校（全国）",v:tsushin.schools+"校",d:"うち私立"+tsushin.private+"校（"+(tsushin.private/tsushin.schools*100).toFixed(1)+"%）"},
+  {l:"在籍者数（全国）",v:(tsushin.students/10000).toFixed(1)+"万人",d:"学習等支援施設 "+tsushin.sites.toLocaleString()+"施設"},
+  {l:"入学者のうち不登校経験",v:(tsushin.futoko/tsushin.entrants*100).toFixed(0)+"%",d:tsushin.futoko.toLocaleString()+"人／"+tsushin.entrants.toLocaleString()+"人（中3時）",cls:'up'},
+  {l:"岡山県の通信制",v:tsushin.okaStudents.toLocaleString()+"人",d:tsushin.okaSchools+"校。前年比 +"+tsushin.okaDelta+"人",cls:'up'},
+  {l:"就学支援金（私立通信制）",v:(tsushin.subsidy/10000).toFixed(1)+"万円",d:"令和8年度から所得制限なし"},
+ ]);
+ document.getElementById('tsushinInsight').innerHTML=
+  `💡 <b>これは学校の数の問題ではなく、経路の問題です。</b>全国の通信制高校は${tsushin.schools}校・在籍${(tsushin.students/10000).toFixed(1)}万人。`+
+  `令和7年度の入学者${tsushin.entrants.toLocaleString()}人のうち<b>${tsushin.futoko.toLocaleString()}人（57%）が中学3年時に不登校を経験</b>しています。`+
+  `岡山県でも通信制は${tsushin.okaStudents.toLocaleString()}人で前年から+${tsushin.okaDelta}人と増加しており、全日制の46,984人が減少するなかで唯一増えている区分です。<br>`+
+  `さらに<b>令和8年度から私立通信制への就学支援金が${tsushin.subsidy.toLocaleString()}円・所得制限なし</b>で支給されるため、この流れは加速すると見られます。`+
+  `<b>②の進学者推計も⑦の定員シミュレーションも、全日制の生徒数を前提に組み立てています。</b>通信制経由の進学者が増えれば、進路の分布そのものが変わります。`+
+  `三党合意は3年以内の検証を約束し、検証対象に「地方や公立高校への影響」を明記しています。`;
+
+ new Chart(document.getElementById('deptCompareChart'),{type:'bar',
+  data:{labels:deptCompare.map(d=>d.n),datasets:[
+   {label:'岡山県',data:deptCompare.map(d=>d.oka),backgroundColor:'rgba(51,200,139,.85)'},
+   {label:'全国',data:deptCompare.map(d=>d.jp),backgroundColor:'rgba(143,163,181,.6)'},
+  ]},
+  options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+   plugins:{legend:{labels:{color:'#8fa3b5',font:{size:11}}},
+    title:{display:true,text:'高校生の学科別構成比（%）',color:'#8fa3b5',font:{size:11.5}},
+    tooltip:{callbacks:{label:c=>c.dataset.label+'：'+c.raw+'%'}}},
+   scales:{x:{...cAxis,max:80,title:{display:true,text:'構成比（%）',color:'#8fa3b5'}},
+    y:{ticks:{color:'#eef3f8',font:{size:11}},grid:{display:false}}}}});
+ document.getElementById('deptInsight').innerHTML=
+  `💡 <b>これは岡山の強みです。</b>専門学科・総合学科等の比率は岡山${deptCompare[1].oka}%に対し全国${deptCompare[1].jp}%で、`+
+  `<b>13.2ポイント厚い</b>構成になっています。②で見たとおり岡山の高卒者は<b>県内就職率80.4%</b>と大卒の約2倍地元に残り、`+
+  `就職先は第2次産業が1,638人と最多です。<b>「専門学科が厚い × 高卒は地元に残る × 製造業が受け皿」という3点が噛み合っている</b>のが岡山の現状で、`+
+  `これはAEW（アドバンスト・エッセンシャルワーカー）育成の基盤として他県より有利な位置にあります。`+
+  `一方で全国の職業学科比率は昭和30年の40.1%から16.9%まで低下しており、岡山の39.1%という水準を維持できるかどうかが問われます。`;
+})();
+
+const tabMap={sum:'tab-sum',pop:'tab-pop',edu:'tab-edu',ind:'tab-ind',skill:'tab-skill',firm:'tab-firm',uni:'tab-uni',sim:'tab-sim'};
 document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{
  if(!t.dataset.tab||!tabMap[t.dataset.tab])return;   // タブ以外のボタンが紛れ込んでも壊さない
  document.querySelectorAll('.tab').forEach(x=>{x.classList.remove('active');x.setAttribute('aria-selected','false');});
