@@ -101,6 +101,13 @@
   .panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px;margin-bottom:16px;box-shadow:var(--shadow-sm)}
   .panel h2{margin:0 0 4px;font-size:15px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
   .panel .hint{color:var(--muted);font-size:12px;margin-bottom:14px;line-height:1.6}
+  /* v1.7: タブ冒頭の「要点」ボックス */
+  .keypts{background:linear-gradient(90deg,var(--accent-soft),transparent 70%);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:var(--radius-sm);padding:12px 16px 10px;margin-bottom:16px}
+  .keypts .kh{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+  .keypts h4{margin:0;font-size:11px;color:var(--accent);letter-spacing:1px;text-transform:uppercase}
+  .keypts .tb{display:inline-block;padding:2px 9px;border-radius:10px;font-size:10.5px;background:var(--panel2);border:1px solid var(--line);color:var(--muted)}
+  .keypts ol{margin:0;padding-left:20px;font-size:12.5px;line-height:1.8;color:var(--text)}
+  .keypts ol b{color:#fff}
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
   .chartbox{position:relative;height:320px}
   table{width:100%;border-collapse:collapse;font-size:12.5px}
@@ -195,7 +202,7 @@
   <div class="headrow">
     <div class="headleft">
       <button class="mobiletoggle" id="mobileToggle" aria-label="フィルタを開く">☰ フィルタ</button>
-      <h1>おかやま人材需給ギャップ ダッシュボード<span class="v">v1.6 / OLIVE</span></h1>
+      <h1>おかやま人材需給ギャップ ダッシュボード<span class="v">v1.7 / OLIVE</span></h1>
     </div>
     <div class="legend-chips">
       <span class="lchip real"><i></i>実データ</span>
@@ -204,7 +211,7 @@
       <span class="lchip mock"><i></i>ダミー（差替予定）</span>
     </div>
   </div>
-  <div class="sub">人口 → 進学 → 就業 → 産業 → 大学定員をひとつの流れで見る意思決定支援ダッシュボード ｜ 各タブ末尾に出典URLを明記しています</div>
+  <div class="sub">OLIVEの4機能のうち<b>「②見立てる」（シンクタンク機能）</b>を担う共通データ基盤 ｜ 取組③「人材需給ギャップの可視化」の稼働中プロトタイプ ｜ 人口 → 進学 → 就業 → 産業 → 大学定員をひとつの流れで見る ｜ 各タブ末尾に出典URLを明記</div>
 </header>
 <div class="wrap">
   <aside class="side" id="side">
@@ -258,6 +265,19 @@
           </div>
         </div>
         <table id="allocTable" style="margin-top:16px"><thead><tr><th>タブ</th><th>指標</th><th>区分</th><th>なぜその区分か</th></tr></thead><tbody></tbody></table>
+      </div>
+
+      <div class="panel">
+        <h2>OLIVEの4つの取組と、このダッシュボードの対応<span class="tag tag-chk">構想説明資料 p14〜22</span></h2>
+        <div class="hint">OLIVEは「集める・見立てる・動かす・還す」の4機能を一体で持つ組織で、本ダッシュボードは<b>②見立てる（シンクタンク機能）</b>の中核です。補助事業の取組①〜④が、どのタブのどの数字を根拠に動くかを整理しました。「開く」で該当タブへ移動します。</div>
+        <table id="torikumiTable"><thead><tr><th>取組</th><th>内容</th><th>根拠となる指標</th><th>タブ</th><th>この数字が動けば成功</th></tr></thead><tbody></tbody></table>
+      </div>
+
+      <div class="panel">
+        <h2>参画機関のデータで解像度が上がる指標<span class="tag tag-mock">差替予定</span></h2>
+        <div class="hint">現在は公開統計のみで構成しています。構想説明資料（p19）のとおり、<b>大学別・地域別の詳細は各大学・会員企業の生データへの差し替えを予定</b>しています。参画メリット⑤「共通データ基盤へのアクセス」は、裏を返せば<b>参画機関がデータを持ち寄ることで初めて成立する</b>基盤です。どの機関の、どのデータで、どの指標が測れるようになるかを一覧にしました。</div>
+        <table id="dataAskTable"><thead><tr><th>提供元</th><th>提供いただきたいデータ</th><th>測れるようになる指標</th><th>タブ</th></tr></thead><tbody></tbody></table>
+        <div class="note note-chk" style="margin-top:14px">💡 米国TPM（Talent Pipeline Management）は、企業が書ける<b>4項目（職種名／新設ポジション数／欠員補充数／必要学歴）</b>の帳票だけで需要側を継続更新し、採用実績から供給元をさかのぼって<b>捕捉率・漏出率</b>を測っています（44州・3,000社超）。会員企業への依頼はこの4項目に絞るのが現実的です。</div>
       </div>
 
       <div class="panel">
@@ -320,6 +340,21 @@
         <h2>年齢5歳階級別 転出超過数（2025年・男女別）<span class="tag tag-real">実データ</span></h2>
         <div class="hint">プラス＝転出超過（流出）、マイナス＝転入超過（流入）。<b>20〜24歳だけで流出全体の約59%、15〜29歳で約96%</b>を占めます。進学と就職のタイミングで人が抜けている構造がはっきり見えます。</div>
         <div class="chartbox" style="height:360px"><canvas id="migAgeChart"></canvas></div>
+      </div>
+
+      <div class="panel">
+        <h2>20〜24歳の転出超過 ― 10年で女性2.6倍・男性1.8倍<span class="tag tag-real">実データ</span></h2>
+        <div class="hint">構想説明資料（p5）の中核データ。進学・就職期の流出は<b>女性が男性を上回り、10年前より加速</b>しています。2025年の転出超過4,168人のうち20〜24歳が約6割。率で見ても女性3.07%・男性2.74%と、同年代の人口の3%前後が毎年抜けています。</div>
+        <div class="grid2">
+          <div class="chartbox" style="height:240px"><canvas id="mig2024Chart"></canvas></div>
+          <div class="stagebox" style="border-left-color:var(--short)">
+            <h4>なぜ女性を先に見るのか</h4>
+            <div style="font-size:12px;color:var(--muted);line-height:1.75">
+            20〜24歳女性の転出超過は<b style="color:#ff6b6f">489人（2015年）→1,290人（2025年）</b>。男性の645人→1,181人より増加幅が大きく、10年で逆転しました。<br><br>
+            ⑤の企業マップで該当0社の分野があること、③で事務職が5,009人余剰であることと合わせると、<b>「女性が就きたい職が県内にない」という仮説</b>が立ちます。⑥のUターン率（近畿22.5%・関東10.9%）を男女別に測ることが次の一手です（未測定）。
+            </div>
+          </div>
+        </div>
       </div>
 
       <div class="grid2">
@@ -388,6 +423,25 @@
       </div>
 
       <div class="panel">
+        <h2>中四国9県との進学者収支 ― 競合は「首都圏」ではなく「京阪神」<span class="tag tag-real">実データ</span></h2>
+        <div class="hint">構想説明資料（p7）の中核データ。岡山は<b>中四国の他8県すべてに対して流入が流出を上回る「受け入れる側」</b>ですが、大阪・東京・京都には大きく出しています。隣県からは集め、大都市圏に出している中継地の構造です。</div>
+        <div class="kpis" id="setouchiKpis"></div>
+        <div class="grid2">
+          <div class="chartbox" style="height:340px"><canvas id="setouchiChart"></canvas></div>
+          <div class="stagebox" style="border-left-color:var(--ok)">
+            <h4>資料が示す3つの言い換え</h4>
+            <div style="font-size:12px;color:var(--muted);line-height:1.75">
+            <b>① 対抗軸を言い換える</b>：「首都圏 vs 地方」ではなく<b>「京阪神・東京圏 vs 瀬戸内・中四国」</b>。中四国から域外へ出た22,331人の54%が近畿へ行き、東京圏は21%。<br><br>
+            <b>② 吸い上げではなく互恵にする</b>：単位互換・国内留学を双方向にし、隣県にも得がある設計にする。<br><br>
+            <b>③ 県のプラットフォームを軸に広域連携を重ねる</b>：実施要項も「隣接県にまたがる生活・経済圏単位」を認めている。<br><br>
+            通学圏で見れば高松 約1時間、福山 新幹線15〜23分、姫路 のぞみ約19分。<b>県境をまたいで同じ通学圏</b>です。
+            </div>
+          </div>
+        </div>
+        <div class="note note-chk" style="margin-top:14px" id="setouchiInsight"></div>
+      </div>
+
+      <div class="panel">
         <h2>高校卒業後の進路 ― 供給の入口（Tier 2）<span class="tag tag-real">実データ</span></h2>
         <div class="hint">OLIVEビジョン 表53は供給機関をTier 1（大学・専門学校）／Tier 2（高校・専門高校）／Tier 3に階層化します。令和7年3月の岡山県の高校卒業者 <b>15,172人</b> がどこへ向かったか。大学だけを見ていると、<b>専修学校2,459人と就職2,906人＝合計5,365人（35.4%）</b>を見落とすことになります。</div>
         <div class="grid2">
@@ -439,6 +493,7 @@
           <li><b>2020年度の県内大学入学者9,566人（内訳含む）</b>：岡山県人口ビジョン改訂版（令和3年3月）p.10 ― <a href="https://www.pref.okayama.jp/uploaded/attachment/289345.pdf" target="_blank" rel="noopener">https://www.pref.okayama.jp/uploaded/attachment/289345.pdf</a></li>
           <li><b>2040年 都道府県別 進学者推計・定員充足率</b>：文部科学省「大学入学者数等の将来推計」資料2（令和6年11月更新） ― <a href="https://www.mext.go.jp/content/20241112-mxt_koutou02-000038707_3.pdf" target="_blank" rel="noopener">https://www.mext.go.jp/content/20241112-mxt_koutou02-000038707_3.pdf</a></li>
           <li><b>全国推計・答申本文</b>：中央教育審議会答申「我が国の『知の総和』向上の未来像」（令和7年2月21日） ― <a href="https://www.mext.go.jp/content/20250520-mxt_keikaku-000042918_10.pdf" target="_blank" rel="noopener">https://www.mext.go.jp/content/20250520-mxt_keikaku-000042918_10.pdf</a></li>
+          <li><b>中四国9県との進学者収支・域内進学率・2040年中四国充足率</b>：文部科学省「学校基本調査」令和7年度（2025年4月入学者）表16の集計／「進学率・進学者数推計結果」（令和6年11月更新）― OLIVE構想説明資料（2026年9月版）p7より転記 ― <a href="https://www.e-stat.go.jp/stat-search/files?page=1&toukei=00400001&tstat=000001011528" target="_blank" rel="noopener">https://www.e-stat.go.jp/stat-search/files?page=1&toukei=00400001&tstat=000001011528</a></li>
         </ul>
       </div>
     </section>
@@ -492,6 +547,20 @@
             <div style="font-size:11.5px;color:var(--muted);margin-top:8px">指標⑤（リスキリング）は、この5.6万人を5.5万人側へ移すための施策として設計されています。</div>
           </div>
         </div>
+        <div class="grid2" style="margin-top:16px">
+          <div>
+            <div style="font-size:12.5px;color:var(--text);font-weight:700;margin-bottom:8px">全国の2040年ミスマッチ（経産省 改訂版・令和8年3月）― 岡山と同じ構造</div>
+            <div class="chartbox" style="height:280px"><canvas id="nationMismatchChart"></canvas></div>
+          </div>
+          <div class="stagebox" style="border-left-color:var(--accent)">
+            <h4>人手不足ではなく「ミスマッチ」</h4>
+            <div style="font-size:12px;color:var(--muted);line-height:1.75">
+            全国の就業者は<b>6,706万人（2022）→6,303万人（2040）</b>。国内投資と産業構造転換が進めばAI・ロボットとリスキリングで約200万人分が効率化され、<b>全体では大きな不足は生じない</b>。生じるのは職種・学歴・地域間のミスマッチです。<br><br>
+            <b style="color:var(--over)">事務職 +437万人 余剰</b>／<b style="color:var(--short)">専門職 −181万人</b>（うちAI・ロボット等の利活用人材 −339万人）／<b style="color:var(--short)">現場人材 −260万人</b>（生産工程 −206万人）。<br><br>
+            学歴別では大卒・院卒<b>理系 −124万人</b>、<b>高卒（工業科）−91万人</b>、高専卒 −15万人が不足し、大卒・院卒<b>文系 +76万人</b>が余剰。岡山の「事務5.6万人余剰／高度人材5.5万人不足」は、この全国構造がそのまま県内に現れたものです。<b>専門学科が厚い岡山（②参照）は、工業科不足に対して有利な位置</b>にあります。
+            </div>
+          </div>
+        </div>
         <div class="note note-mock" style="margin-top:14px"><b>未測定：業種別・職種別のブレークダウン。</b>ビジョン文書 表37①は、この2つの総量を「業種別・職種別（事務系／DX・GX・AX専門職／アドバンスト・エッセンシャルワーカー等）の過不足人数」へ分解することを求めていますが、<b>この分解はまだ行われていません</b>。実施主体は岡山経済研究所（シンクタンク機能）、使用予定データはRESAS・国の産業構造/雇用政策研究会推計です。分解が完了するまで、上のグラフは<b>「現在（令和8年5月）の求人求職ギャップ」であって2040年の推計ではない</b>点にご注意ください。</div>
       </div>
 
@@ -525,6 +594,7 @@
       <div class="srcbox">
         <h4>③ の出典</h4>
         <ul>
+          <li><b>全国の2040年 職種別・学歴別 需給ミスマッチ</b>：経済産業省「2040年の就業構造推計（改訂版）」（令和8年3月）― OLIVE構想説明資料（2026年9月版）p4より転記 ― <a href="https://www.meti.go.jp/" target="_blank" rel="noopener">https://www.meti.go.jp/</a>（原典PDFのURLは要確認）</li>
           <li><b>職業中分類別 求人・求職・有効求人倍率、ハローワーク別倍率</b>：岡山労働局「雇用情勢 令和8年5月分」（求人÷求職で検算一致を確認） ― <a href="https://jsite.mhlw.go.jp/okayama-roudoukyoku/" target="_blank" rel="noopener">https://jsite.mhlw.go.jp/okayama-roudoukyoku/</a></li>
           <li><b>岡山県 月次 有効求人倍率（直近12か月）</b>：e-Stat 一般職業紹介状況 第11表-6 ― <a href="https://www.e-stat.go.jp/stat-search?page=1&toukei=00450222" target="_blank" rel="noopener">https://www.e-stat.go.jp/stat-search?page=1&amp;toukei=00450222</a></li>
         </ul>
@@ -781,6 +851,18 @@
       </div>
 
       <div class="panel">
+        <h2>地理的アクセス ― 大学定員の9割が県南3市に集中<span class="tag tag-real">立地=実データ</span><span class="tag tag-chk">要確認</span></h2>
+        <div class="hint">構想説明資料（p6）は「質・規模・アクセス」の3課題のうちアクセスについて、<b>18大学のうち14機関が岡山市・倉敷市・総社市に立地し、県北・県西部では通学圏内の選択肢が乏しい</b>と指摘しています。⑦の定員を主要キャンパス所在地で集計しました。定員割れ（配置の問題）と地理的偏在（アクセスの問題）は<b>別の問題であり、定員を減らすと県北の選択肢が先に消える</b>という二律背反があります。</div>
+        <div class="kpis" id="uniLocKpis"></div>
+        <div class="grid2">
+          <div class="chartbox" style="height:280px"><canvas id="uniLocChart"></canvas></div>
+          <table id="uniLocTable"><thead><tr><th>所在地</th><th>大学数</th><th>入学定員</th><th>構成比</th><th>大学</th></tr></thead><tbody></tbody></table>
+        </div>
+        <div class="note note-chk" style="margin-top:14px" id="uniLocInsight"></div>
+        <div class="note note-mock" style="margin-top:10px"><b>要確認：</b>構想説明資料p6は「14機関が岡山・倉敷・総社に立地」と記載していますが（同ページ内に「12機関」の記載も残っています）、本表で主要キャンパス所在地により分類すると<b>15校</b>になります。環太平洋大学（岡山市東区）・岡山学院大学（倉敷市）・岡山医療専門職大学（岡山市北区）の扱いをご確認ください。資料側の記載を揃える必要があります。</div>
+      </div>
+
+      <div class="panel">
         <h2>「配置の道具」の限界 ― 定員を埋めても地元定着は改善しない<span class="tag tag-real">実データ</span></h2>
         <div class="hint">このタブが扱う定員・充足率は、世界29事例の分類でいう<b>典型的な「配置の指標」</b>です。定員を動かす政策が地域定着に届くのかを、日本国内の検証済み事例2つで確認します。</div>
 
@@ -832,6 +914,7 @@
       <div class="srcbox">
         <h4>⑦ の出典</h4>
         <ul>
+          <li><b>大学の所在地（主要キャンパス）</b>：各大学公式サイトの所在地／OLIVE構想説明資料（2026年9月版）p6「県内の4年制大学18機関＋高専の立地」（国土地理院データに基づく地図）</li>
           <li><b>2040年 岡山県 入学定員充足率 65.8%</b>：文部科学省「大学入学者数等の将来推計」資料2（令和6年11月更新） ― <a href="https://www.mext.go.jp/content/20241112-mxt_koutou02-000038707_3.pdf" target="_blank" rel="noopener">https://www.mext.go.jp/content/20241112-mxt_koutou02-000038707_3.pdf</a></li>
           <li><b>岡山大学 学部別入学定員</b>：国立大学法人岡山大学管理学則 別表第1・附則第5項 ― <a href="https://www.okayama-u.ac.jp/shokisoku/reiki_honbun/u352RG00000001.html" target="_blank" rel="noopener">https://www.okayama-u.ac.jp/shokisoku/reiki_honbun/u352RG00000001.html</a></li>
           <li><b>岡山理科大学</b>：「入学定員等」 ― <a href="https://www.ous.ac.jp/outline/disclosure/capacity/" target="_blank" rel="noopener">https://www.ous.ac.jp/outline/disclosure/capacity/</a></li>
@@ -1915,6 +1998,90 @@ const turnoverInd=[{n:"宿泊業，飲食サービス業",hs:65.1,uni:56.6},{n:"
  {n:"教育，学習支援業",hs:53.1,uni:46.6},{n:"医療，福祉",hs:49.3,uni:41.5},{n:"小売業",hs:48.6,uni:41.9}];
 
 
+// ===== v1.7: 構想説明資料（2026年9月版）から追加 =====
+// p5: 20〜24歳 転出超過の10年変化（DBJ岡山事務所 2026年度版・原典 住民基本台帳人口移動報告）
+const mig2024=[
+ {sex:"女性",y2015:489,y2025:1290,rate:3.07},
+ {sex:"男性",y2015:645,y2025:1181,rate:2.74},
+];
+// p7: 岡山と各県の進学者のやりとり（差し引き・人。学校基本調査 令和7年度 表16）
+const setouchiFlow=[
+ {r:"広島",v:335},{r:"香川",v:215},{r:"愛媛",v:140},{r:"鳥取",v:94},{r:"島根",v:74},
+ {r:"徳島",v:74},{r:"高知",v:33},{r:"山口",v:29},{r:"京都",v:-539},{r:"東京",v:-572},{r:"大阪",v:-680},
+];
+const setouchiMeta={outTotal:22331,kinkiPct:54,tokyoPct:21,okaInRate:41.2,setouchi6Rate:55.6,fill2040:67};
+// p4: 全国の2040年 職種別・学歴別ミスマッチ（経産省 改訂版・令和8年3月、万人）
+const nationMismatch=[
+ {n:"事務職",v:437,grp:"職種"},
+ {n:"大卒・院卒 文系",v:76,grp:"学歴"},
+ {n:"高専卒",v:-15,grp:"学歴"},
+ {n:"高卒（工業科）",v:-91,grp:"学歴"},
+ {n:"大卒・院卒 理系",v:-124,grp:"学歴"},
+ {n:"専門職",v:-181,grp:"職種"},
+ {n:"現場人材",v:-260,grp:"職種"},
+ {n:"うちAI・ロボット等 利活用人材",v:-339,grp:"職種"},
+];
+// p6: 18大学の主要キャンパス所在地（⑦ univCapacity と名称で結合）
+const uniLocation={
+ "岡山大学":"岡山市","岡山理科大学":"岡山市","就実大学":"岡山市","ノートルダム清心女子大学":"岡山市","岡山商科大学":"岡山市",
+ "山陽学園大学":"岡山市","中国学園大学":"岡山市","環太平洋大学":"岡山市","岡山医療専門職大学":"岡山市",
+ "川崎医療福祉大学":"倉敷市","倉敷芸術科学大学":"倉敷市","くらしき作陽大学":"倉敷市","川崎医科大学":"倉敷市","岡山学院大学":"倉敷市",
+ "岡山県立大学":"総社市","吉備国際大学":"高梁市","美作大学":"津山市","新見公立大学":"新見市",
+};
+// p14〜22: 取組①〜④ × ダッシュボード
+const torikumi=[
+ ["取組①","高校改革と連動した大学改革（N-E.X.T.拠点校連携・連携開設科目）","高卒の県内就職率80.4%／専門学科比率39.1%／高校卒業者15,172人の進路","edu","高校→県内大学の進学者数（現在4,017人）が増える／専門学科からの進学率が上がる"],
+ ["取組②","高度DX・GX・AX人材とアントレプレナーの輩出（PBL・OI-Start WG）","スキル4象限（情報通信＝高スキル×余剰）／AI・ロボット等人材の2040年不足","skill","指標③ PBL年間50件・5,000名／④の「高スキル×不足」象限が縮む"],
+ ["取組③","人材需給ギャップの可視化とリスキリング（本ダッシュボード・ハレリカ・岡大講座）","事務職5.6万人余剰／高度人材5.5万人不足／職種別ギャップ人数","ind","指標⑤ リスキリング累計250社・1,000名／指標⑥ 重点分野の求人倍率15%低減"],
+ ["取組④","「育成」と「活用」を直結する完全自走化モデル（リクルート・会員制度）","大卒県内就職率40.8%／Uターン率 近畿22.5%・関東10.9%／正社員100人以上700社","uni","指標④ 県内就職率45.8%／指標⑲ 3年後定着率／指標⑦ 自走財源3,000万円"],
+];
+// p11・p19: 参画機関に提供をお願いするデータ
+const dataAsk=[
+ ["参画大学","入学者の出身地（県内／県外）× 就職先（県内／県外）の2×2集計","Uターン率・県外出身者の県内定着率（指標⑲の分母）","uni"],
+ ["参画大学","学部別 就職先の産業・職種・企業規模","⑥ 大学×分野ヒートマップの実データ化（現在は推計モデル）","uni"],
+ ["会員企業","TPM 4項目：職種名／新設ポジション数／欠員補充数／必要学歴","③ 2040年ギャップの業種別分解／④ 需要側スキル水準","ind"],
+ ["会員企業","採用者の出身校と3年後の在籍有無（匿名化）","指標⑲ 3年後定着率／供給元別の捕捉率・漏出率","uni"],
+ ["N-E.X.T.拠点校・高校","学科別の進路先（進学先大学・就職先産業）","② Tier 2の供給経路／専門学科からの進学率","edu"],
+ ["専修学校・高専","学科別 入学定員と卒業生の県内就職率","② Tier 1の供給量の積み上げ／AEW供給源の把握","edu"],
+ ["自治体","市町村別・年齢別の転入転出（住民基本台帳）","① 県北・県西部の流出の把握／⑦ 通学圏カバー率","pop"],
+ ["岡山労働局","職業中分類別 求人・求職の月次データ（生データ）","③ 需給ギャップの月次自動更新","ind"],
+];
+// タブ冒頭の要点（v1.7 UI）
+const keyPoints={
+ 'tab-sum':{tb:"OLIVE 4機能：②見立てる",pts:[
+  "岡山県の問題は「進学者が減ること」以上に<b>「進学した若者が戻ってこないこと」</b>。県外進学者のUターン率は近畿22.5%・関東10.9%。",
+  "収録指標の多くは<b>配置の指標</b>（人数・定員）。打ち手の対象になる<b>接続の指標</b>（定着率・Uターン率・離職率）は参画機関のデータで初めて測れる。",
+  "13項目を<b>「測れていない」と明記</b>。KPIを点検する際に「測り方の問題か、施策の問題か」を切り分けるため。"]},
+ 'tab-pop':{tb:"取組③の前提データ",pts:[
+  "2040年の生産年齢人口は<b>88.7万人（2025年比 −15.2%）</b>。申請書の「約15%減少」と一致。",
+  "転出超過は<b>13年連続</b>。2025年は4,168人で、うち<b>20〜24歳が約6割</b>。",
+  "20〜24歳女性の転出超過は<b>10年で2.6倍</b>（489→1,290人）。男性を上回り、加速している。"]},
+ 'tab-edu':{tb:"取組①（高大接続）・取組③",pts:[
+  "県内高校出身者の<b>約59%が県外の大学へ</b>進学。競合は首都圏ではなく<b>京阪神</b>（関西圏2,249人＝東京圏の2.5倍）。",
+  "岡山は中四国の他8県すべてから進学者を集める<b>「受け入れる側」</b>。隣県から集め、大都市圏へ出す中継地。",
+  "高卒の県内就職率は<b>80.4%</b>で大卒の約2倍。専門学科比率39.1%は全国より13pt厚く、AEW供給の基盤。"]},
+ 'tab-ind':{tb:"取組③（リスキリング設計）",pts:[
+  "有効求人倍率1.23倍でも中身は<b>ミスマッチ</b>：不足15,333人／38職種 と 余剰10,970人／17職種 が併存。",
+  "2040年は<b>事務職5.6万人余剰／高度人材5.5万人不足</b>。全国（事務+437万人／AI・ロボット人材−339万人）と同じ構造。",
+  "建設・製造の不足は<b>スキルの壁ではなく賃金・条件</b>（④参照）。宿泊飲食277千円 vs 電気ガス444千円。"]},
+ 'tab-skill':{tb:"取組②（PBL・WG設計）",pts:[
+  "4象限で切り分ける：<b>医療・看護／介護・福祉＝高スキル×不足</b>、<b>建設・製造＝低スキル×不足</b>（条件の問題）、<b>情報通信＝高スキル×余剰</b>、<b>事務＝低スキル×余剰</b>。",
+  "リスキリングの設計対象は「事務（余剰）→高度現場人材（不足）」の移動。OI-StartのAI利活用WG・ロボティクスWG・看護保育（AEW）WGに対応。",
+  "需要側（企業が求めるスキル水準）は<b>未測定</b>。会員企業のTPM 4項目で取得予定。"]},
+ 'tab-firm':{tb:"取組④（会員企業・リクルート）",pts:[
+  "正社員100人以上の企業は<b>700社・約23万人</b>（SalesNow DB 695社＋県外本社の事業所5件）。研究協力会 約90社＋OI-Start 150社超の母数。",
+  "戦略17分野のうち<b>5分野は該当企業0社</b>（デジタル・量子・航空宇宙・合成生物学・核融合）。県内に受け皿がない分野では育成しても流出する。",
+  "製造業（特化係数1.49）・保健衛生（1.48）が県を牽引。スマートファクトリー・看護DXのPBLはここに向ける。"]},
+ 'tab-uni':{tb:"取組④（定着）・指標④⑲",pts:[
+  "大卒県内就職率<b>40.8%</b>（目標45.8%）。県外出身者の県内就職率は<b>17.4%</b>。",
+  "県外から来た学生の県内定着<b>869人 ＞ Uターン603人</b>。「県外から来た学生を通過者にしない」ほうが効く。",
+  "地方定着に最も効く変数は<b>地元出身者を採ること（オッズ比2.71）</b>。出身地×就職地の2×2は8校すべて未公表＝参画大学のデータで最初に測る。"]},
+ 'tab-sim':{tb:"取組③・大学等連携推進法人",pts:[
+  "18大学・83学部・入学定員<b>10,272人</b>に対し、2040年の充足率は<b>65.8%</b>（約3,513人の定員割れ）。私立は62.5%。",
+  "定員の<b>9割が岡山・倉敷・総社の3市</b>に集中。定員を減らすと県北の選択肢が先に消える（規模とアクセスの二律背反）。",
+  "公立化・COC+は<b>席は埋めたが地元定着は改善しなかった</b>。定員調整という「配置の道具」で応えると同じ結果になる。教員不足が律速要因。"]},
+};
+
 // ===== 配置／接続の分類（世界29事例 表4） =====
 const alloConn=[
  ["①","将来人口推計","配置の前提","人口・年齢構成は与件。打ち手の対象ではない"],
@@ -1929,6 +2096,8 @@ const alloConn=[
  ["⑥","3年以内離職率","接続","接続が持続したかのアウトカム"],
  ["⑦","学部別入学定員","配置","定員＝席の数"],
  ["⑦","2040年 定員充足率","配置","席が埋まるかどうか"],
+ ["②","中四国9県との進学者収支","接続","隣県から集めた学生を通過者にしない経路の設計"],
+ ["⑦","大学の立地（県南3市に9割）","配置","拠点の場所。接続（遠隔・連携開設科目）で補う対象"],
 ];
 
 // ===== 公立化の効果：高知工科大学16年（文科省「公立化効果の見える化」） =====
@@ -2875,14 +3044,14 @@ document.querySelector('#uniInOutTable tbody').innerHTML=uni.map(u=>{
 
  // --- データ充足状況 ---
  const dq=[['実データ',P.filter(r=>r[5]==='real').length],['実データ・要確認',P.filter(r=>r[5]==='chk').length],
-           ['推計',P.filter(r=>r[5]==='est').length],['未測定（別表）',11]];
+           ['推計',P.filter(r=>r[5]==='est').length],['未測定（別表）',13]];
  new Chart(document.getElementById('dataQualityChart'),{type:'doughnut',
   data:{labels:dq.map(d=>d[0]),datasets:[{data:dq.map(d=>d[1]),
    backgroundColor:['rgba(51,200,139,.85)','rgba(62,166,255,.8)','rgba(168,120,255,.8)','rgba(255,176,32,.8)'],
    borderColor:'#151f2a',borderWidth:2}]},
   options:{responsive:true,maintainAspectRatio:false,
    plugins:{legend:{position:'right',labels:{color:'#8fa3b5',font:{size:11},boxWidth:12}},
-    title:{display:true,text:'主要パラメータ'+P.length+'件＋未測定11件の内訳',color:'#8fa3b5',font:{size:11.5}},
+    title:{display:true,text:'主要パラメータ'+P.length+'件＋未測定13件の内訳',color:'#8fa3b5',font:{size:11.5}},
     tooltip:{callbacks:{label:c=>c.label+'：'+c.raw+'件'}}}}});
 
  // --- KPIミニ表 ---
@@ -2894,6 +3063,9 @@ document.querySelector('#uniInOutTable tbody').innerHTML=uni.map(u=>{
   ['指標⑤ リスキリング導入','ハレリカ 57社・125人（R7）','累計250社・1,000名','<span class="badge b-warn">基準値あり</span>'],
   ['指標⑦ 自走化財源','—','年間3,000万円','<span class="badge b-short">未測定</span>'],
   ['指標⑲ 3年後定着率（中核）','全国値：大卒33.8%が離職','会員企業データで測定予定','<span class="badge b-short">未測定</span>'],
+  ['国内留学 受入学生数（たたき台）','新見市モデル 4大学で実証中','R9 20人 → R10 60人','<span class="badge b-short">未測定</span>'],
+  ['国内留学 協定・覚書（たたき台）','—','R9 2件 → R10 4件','<span class="badge b-short">未測定</span>'],
+  ['取組④ 法人会員数','研究協力会 約90社＋OI-Start 150社超','有料会員制度へ移行（R10）','<span class="badge b-warn">母数あり</span>'],
  ];
  document.querySelector('#kpiMiniTable tbody').innerHTML=K.map(r=>
   `<tr><td style="font-size:11.5px">${r[0]}</td><td style="text-align:left;font-size:11.5px">${r[1]}</td>`+
@@ -2912,6 +3084,8 @@ document.querySelector('#uniInOutTable tbody').innerHTML=uni.map(u=>{
   ['⑥','出身地×就職地のクロス集計','8校すべて未公表。指標⑲として会員企業の匿名化データから取得予定'],
   ['⑥','岡山県別の3年以内離職率','全国値のみ。都道府県別の公表は確認できず'],
   ['⑥','大学×分野×職種の県内就職者数','この粒度の公表統計は存在せず。現在は学部定員からの推計モデル'],
+  ['⑦','県北・県西部の高校からの大学通学圏カバー率','大学立地は⑦に収録したが、高校所在地×通学時間のマトリクスは未作成'],
+  ['②','国内留学が入学者確保・地域定着に与える効果','構想説明資料p18のとおり国内で定量的検証なし。新見市モデルから最初に測る'],
  ];
  document.querySelector('#gapsTable tbody').innerHTML=G.map(r=>
   `<tr><td style="text-align:center;font-weight:700;color:var(--accent)">${r[0]}</td>`+
@@ -3056,6 +3230,118 @@ document.querySelector('#uniInOutTable tbody').innerHTML=uni.map(u=>{
   `就職先は第2次産業が1,638人と最多です。<b>「専門学科が厚い × 高卒は地元に残る × 製造業が受け皿」という3点が噛み合っている</b>のが岡山の現状で、`+
   `これはAEW（アドバンスト・エッセンシャルワーカー）育成の基盤として他県より有利な位置にあります。`+
   `一方で全国の職業学科比率は昭和30年の40.1%から16.9%まで低下しており、岡山の39.1%という水準を維持できるかどうかが問われます。`;
+})();
+
+// ========== v1.7 追加分の描画（構想説明資料 2026年9月版） ==========
+(function(){
+ const jumpTo=(key)=>{const t=document.querySelector('.tab[data-tab="'+key+'"]'); if(t) t.click();};
+ const tabLabel={sum:'◎',pop:'①',edu:'②',ind:'③',skill:'④',firm:'⑤',uni:'⑥',sim:'⑦'};
+ const jumpBtn=k=>`<span class="jump" data-go="${k}">${tabLabel[k]||k} 開く</span>`;
+
+ // ---------- 各タブ冒頭の「要点」 ----------
+ Object.keys(keyPoints).forEach(id=>{
+  const sec=document.getElementById(id); if(!sec||!sec.insertAdjacentHTML) return;
+  const k=keyPoints[id];
+  sec.insertAdjacentHTML('afterbegin',
+   `<div class="keypts"><div class="kh"><h4>このタブの要点</h4><span class="tb">${k.tb}</span></div><ol>${k.pts.map(p=>`<li>${p}</li>`).join('')}</ol></div>`);
+ });
+
+ // ---------- ◎ 取組①〜④ × ダッシュボード ----------
+ document.querySelector('#torikumiTable tbody').innerHTML=torikumi.map(r=>
+  `<tr><td style="font-weight:700;color:var(--accent);white-space:nowrap">${r[0]}</td>`+
+  `<td style="text-align:left;font-size:12px">${r[1]}</td>`+
+  `<td style="text-align:left;font-size:11.5px;color:var(--muted)">${r[2]}</td>`+
+  `<td style="text-align:center">${jumpBtn(r[3])}</td>`+
+  `<td style="text-align:left;font-size:11.5px;color:var(--ok)">${r[4]}</td></tr>`).join('');
+ document.querySelector('#dataAskTable tbody').innerHTML=dataAsk.map(r=>
+  `<tr><td style="font-weight:700;white-space:nowrap">${r[0]}</td>`+
+  `<td style="text-align:left;font-size:12px">${r[1]}</td>`+
+  `<td style="text-align:left;font-size:11.5px;color:var(--muted)">${r[2]}</td>`+
+  `<td style="text-align:center">${jumpBtn(r[3])}</td></tr>`).join('');
+ document.querySelectorAll('#torikumiTable .jump, #dataAskTable .jump').forEach(b=>b.addEventListener('click',()=>jumpTo(b.dataset.go)));
+
+ // ---------- ① 20〜24歳 転出超過の10年変化 ----------
+ new Chart(document.getElementById('mig2024Chart'),{type:'bar',
+  data:{labels:mig2024.map(m=>m.sex),datasets:[
+   {label:'2015年',data:mig2024.map(m=>m.y2015),backgroundColor:'rgba(143,163,181,.6)'},
+   {label:'2025年',data:mig2024.map(m=>m.y2025),backgroundColor:mig2024.map(m=>m.sex==='女性'?'rgba(255,107,111,.85)':'rgba(62,166,255,.8)')},
+  ]},
+  options:{responsive:true,maintainAspectRatio:false,
+   plugins:{legend:{labels:{color:'#8fa3b5',font:{size:11}}},
+    title:{display:true,text:'20〜24歳 転出超過数（人）',color:'#8fa3b5',font:{size:11.5}},
+    tooltip:{callbacks:{label:c=>c.dataset.label+'：'+c.raw.toLocaleString()+'人',
+     afterLabel:c=>c.datasetIndex===1?('転出超過率 '+mig2024[c.dataIndex].rate+'%／10年で'+(mig2024[c.dataIndex].y2025/mig2024[c.dataIndex].y2015).toFixed(1)+'倍'):''}}},
+   scales:{x:{ticks:{color:'#eef3f8',font:{size:12}},grid:{display:false}},
+    y:{...cAxis,beginAtZero:true,title:{display:true,text:'人',color:'#8fa3b5'}}}}});
+
+ // ---------- ② 中四国9県との進学者収支 ----------
+ const M=setouchiMeta;
+ document.getElementById('setouchiKpis').innerHTML=kpiHtml([
+  {l:"中四国9県から域外の大学へ",v:M.outTotal.toLocaleString()+"人",d:"うち近畿へ"+M.kinkiPct+"%・東京圏へ"+M.tokyoPct+"%"},
+  {l:"岡山が流入超過の県",v:"8県すべて",d:"中四国の他8県のどこに対しても受け入れる側",cls:'down'},
+  {l:"域内進学率",v:M.okaInRate+"%",d:"岡山県のみ。瀬戸内6県では"+M.setouchi6Rate+"%"},
+  {l:"2040年 中四国9県の定員充足率",v:"約"+M.fill2040+"%",d:"今の流れが続いた場合の推計",cls:'up'},
+ ]);
+ new Chart(document.getElementById('setouchiChart'),{type:'bar',
+  data:{labels:setouchiFlow.map(s=>s.r),datasets:[{data:setouchiFlow.map(s=>s.v),
+   backgroundColor:setouchiFlow.map(s=>s.v>=0?'rgba(51,200,139,.85)':'rgba(255,107,111,.85)')}]},
+  options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+   plugins:{legend:{display:false},
+    title:{display:true,text:'岡山と各県の進学者のやりとり（差し引き・人）　緑＝岡山への流入超過／赤＝岡山からの流出超過',color:'#8fa3b5',font:{size:11}},
+    tooltip:{callbacks:{label:c=>(c.raw>=0?'岡山への流入超過 +':'岡山からの流出超過 ')+c.raw.toLocaleString()+'人'}}},
+   scales:{x:{...cAxis,title:{display:true,text:'人',color:'#8fa3b5'}},
+    y:{ticks:{color:'#eef3f8',font:{size:11}},grid:{display:false}}}}});
+ const inSum=setouchiFlow.filter(s=>s.v>0).reduce((a,s)=>a+s.v,0), outSum=setouchiFlow.filter(s=>s.v<0).reduce((a,s)=>a+s.v,0);
+ document.getElementById('setouchiInsight').innerHTML=
+  `💡 <b>隣県からは集め、大都市圏に出している。</b>中四国8県からの流入超過は合計<b style="color:var(--ok)">+${inSum.toLocaleString()}人</b>、`+
+  `大阪・東京・京都への流出超過は合計<b style="color:#ff6b6f">${outSum.toLocaleString()}人</b>。差し引きでは出超ですが、`+
+  `<b>広島（+335人）・香川（+215人）から集めている</b>という事実は、岡山が瀬戸内の受け皿として機能していることを示します。`+
+  `⑥で見たとおり県外出身者の県内就職率は17.4%にとどまるため、<b>隣県から集めた学生を「通過者」にしないこと</b>が、Uターン促進より先に効く打ち手です。`+
+  `今の流れが続けば2040年の中四国9県の定員充足率は約${M.fill2040}%。<b>岡山だけが生き残る設計ではなく、隣県にも得がある互恵の設計</b>が求められます。`;
+
+ // ---------- ③ 全国2040年ミスマッチ ----------
+ new Chart(document.getElementById('nationMismatchChart'),{type:'bar',
+  data:{labels:nationMismatch.map(n=>n.n),datasets:[{data:nationMismatch.map(n=>n.v),
+   backgroundColor:nationMismatch.map(n=>n.v>=0?'rgba(168,120,255,.85)':'rgba(255,107,111,.85)')}]},
+  options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+   plugins:{legend:{display:false},
+    title:{display:true,text:'2040年 需給ミスマッチ（万人）　紫＝余剰／赤＝不足',color:'#8fa3b5',font:{size:11.5}},
+    tooltip:{callbacks:{label:c=>(c.raw>=0?'余剰 +':'不足 ')+c.raw+'万人（'+nationMismatch[c.dataIndex].grp+'別）'}}},
+   scales:{x:{...cAxis,title:{display:true,text:'万人',color:'#8fa3b5'}},
+    y:{ticks:{color:'#eef3f8',font:{size:10.5}},grid:{display:false}}}}});
+
+ // ---------- ⑦ 大学立地 ----------
+ const locAgg={};
+ univCapacity.forEach(u=>{const loc=uniLocation[u.name]||'不明'; (locAgg[loc]=locAgg[loc]||{n:0,cap:0,names:[]}); locAgg[loc].n++; locAgg[loc].cap+=u.cap; locAgg[loc].names.push(u.name);});
+ const locOrder=['岡山市','倉敷市','総社市','高梁市','津山市','新見市','不明'].filter(l=>locAgg[l]);
+ const capTotal=univCapacity.reduce((a,u)=>a+u.cap,0);
+ const south=['岡山市','倉敷市','総社市'].reduce((a,l)=>a+(locAgg[l]?locAgg[l].cap:0),0);
+ const southN=['岡山市','倉敷市','総社市'].reduce((a,l)=>a+(locAgg[l]?locAgg[l].n:0),0);
+ document.getElementById('uniLocKpis').innerHTML=kpiHtml([
+  {l:"岡山・倉敷・総社の3市",v:southN+"校",d:"18大学中。定員"+south.toLocaleString()+"人（"+(south/capTotal*100).toFixed(1)+"%）"},
+  {l:"3市以外",v:(18-southN)+"校",d:"高梁・津山・新見。定員"+(capTotal-south).toLocaleString()+"人（"+((capTotal-south)/capTotal*100).toFixed(1)+"%）",cls:'up'},
+  {l:"県北の4年制大学",v:"2校",d:"美作大学（津山）・新見公立大学（新見）"},
+  {l:"大学が0校の市町村",v:(27-6)+"／27",d:"県内27市町村のうち大学立地は6市のみ",cls:'up'},
+ ]);
+ const locColors={'岡山市':'rgba(62,166,255,.85)','倉敷市':'rgba(51,200,139,.85)','総社市':'rgba(168,120,255,.85)','高梁市':'rgba(255,176,32,.85)','津山市':'rgba(255,107,111,.85)','新見市':'rgba(255,140,80,.85)','不明':'rgba(143,163,181,.6)'};
+ new Chart(document.getElementById('uniLocChart'),{type:'doughnut',
+  data:{labels:locOrder,datasets:[{data:locOrder.map(l=>locAgg[l].cap),backgroundColor:locOrder.map(l=>locColors[l]),borderColor:'#151f2a',borderWidth:2}]},
+  options:{responsive:true,maintainAspectRatio:false,
+   plugins:{legend:{position:'right',labels:{color:'#8fa3b5',font:{size:11},boxWidth:12}},
+    title:{display:true,text:'所在地別 入学定員の構成（合計'+capTotal.toLocaleString()+'人）',color:'#8fa3b5',font:{size:11.5}},
+    tooltip:{callbacks:{label:c=>c.label+'：'+c.raw.toLocaleString()+'人（'+(c.raw/capTotal*100).toFixed(1)+'%）・'+locAgg[c.label].n+'校'}}}}});
+ document.querySelector('#uniLocTable tbody').innerHTML=locOrder.map(l=>
+  `<tr><td style="font-weight:700">${l}</td><td>${locAgg[l].n}校</td><td>${locAgg[l].cap.toLocaleString()}人</td>`+
+  `<td style="font-weight:700;color:${['岡山市','倉敷市','総社市'].includes(l)?'var(--accent)':'var(--warn)'}">${(locAgg[l].cap/capTotal*100).toFixed(1)}%</td>`+
+  `<td style="text-align:left;font-size:11px;color:var(--muted)">${locAgg[l].names.join('・')}</td></tr>`).join('');
+ document.getElementById('uniLocInsight').innerHTML=
+  `💡 <b>定員割れとアクセス偏在は別の問題です。</b>入学定員${capTotal.toLocaleString()}人のうち<b>${(south/capTotal*100).toFixed(1)}%が岡山・倉敷・総社の3市</b>に集中し、`+
+  `県北の4年制大学は美作大学（210人）と新見公立大学（180人）の2校・390人（3.8%）だけです。2040年に充足率65.8%まで落ちるとき、`+
+  `<b>市場に任せれば小規模な県北の大学から先に定員が消え、通学圏内の選択肢が失われます</b>。構想説明資料が「規模の適正化」と「アクセスの確保」を`+
+  `一見相反する要請と呼び、それを1つのグランドデザインで描き切ることをOLIVEの最大の使命としているのはこのためです。`+
+  `答えは定員の配置ではなく、<b>連携開設科目・遠隔授業（地域アクセス確保特例制度）・国内留学</b>という「接続」の側にあります。`;
+
+ // ---------- 未測定の項目：男女別Uターン率 ----------
 })();
 
 const tabMap={sum:'tab-sum',pop:'tab-pop',edu:'tab-edu',ind:'tab-ind',skill:'tab-skill',firm:'tab-firm',uni:'tab-uni',sim:'tab-sim'};
